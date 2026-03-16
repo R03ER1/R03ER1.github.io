@@ -95,6 +95,15 @@ const ROOMS = {
 // Typ: { name, roomId, tableId, tableNumber, seatNumber, createdAt }
 let reservations = [];
 
+function getFreeSeatCount(roomId, table) {
+  const takenSeatNumbers = new Set(
+    reservations
+      .filter((r) => r.roomId === roomId && r.tableId === table.id)
+      .map((r) => r.seatNumber)
+  );
+  return table.seatCount - takenSeatNumbers.size;
+}
+
 // ---------- Aplikace ----------
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("reservation-form");
@@ -113,21 +122,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // přijdou nové data všem uživatelům
   onSnapshot(reservationsCol, (snapshot) => {
     reservations = snapshot.docs.map((doc) => doc.data());
+    populateTables(true);
     renderSeats();
     renderTakenSeatsInfo();
   });
 
-  function populateTables() {
+  function populateTables(keepSelection = false) {
     const roomId = roomSelect.value;
     const room = ROOMS[roomId];
+    const previousTableId = keepSelection ? tableSelect.value : null;
     tableSelect.innerHTML = "";
 
     room.tables.forEach((table) => {
       const option = document.createElement("option");
       option.value = table.id;
-      option.textContent = `Stůl ${table.number}`;
+      const free = getFreeSeatCount(room.id, table);
+      option.textContent = `Stůl ${table.number} (${free}/${table.seatCount})`;
       tableSelect.appendChild(option);
     });
+
+    if (keepSelection && previousTableId) {
+      const exists = room.tables.some((t) => t.id === previousTableId);
+      if (exists) {
+        tableSelect.value = previousTableId;
+      }
+    }
 
     renderSeats();
     renderTakenSeatsInfo();
