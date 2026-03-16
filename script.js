@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tableSelect = document.getElementById("table");
   const seatsContainer = document.getElementById("seats-container");
   const formMessage = document.getElementById("form-message");
+  const paymentInfo = document.getElementById("payment-info");
   const clearSelectionBtn = document.getElementById("clear-selection");
   const takenSeatsDiv = document.getElementById("taken-seats");
   const downloadCsvBtn = document.getElementById("download-csv");
@@ -283,6 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     formMessage.textContent = "";
     formMessage.className = "form-message";
+    if (paymentInfo) {
+      paymentInfo.innerHTML = "";
+    }
 
     const name = nameInput.value.trim();
     if (!name) {
@@ -329,6 +333,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const nowIso = new Date().toISOString();
+    const seatCountForPrice = selectedSeatNumbers.size;
+    const ticketPricePerSeat = room.id === "room1" ? 450 : 420;
+    const totalPrice = seatCountForPrice * ticketPricePerSeat;
     try {
       // Zapíšeme každé vybrané místo u stolu jako samostatný dokument
       const promises = Array.from(selectedSeatNumbers).map((seatNumber) =>
@@ -389,6 +396,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       formMessage.textContent = "Rezervace proběhla úspěšně. Děkujeme!";
       formMessage.classList.add("success");
+      if (paymentInfo) {
+        const formattedTotal = `${totalPrice} Kč`;
+        paymentInfo.innerHTML = `
+          <span>Celková částka za lístky u stolů je <strong>${formattedTotal}</strong>.</span>
+          <div style="margin-top:8px;">
+            <img src="img/qr.jpg" alt="QR kód k platbě" style="max-width:220px; width:100%; height:auto; border-radius:12px;">
+          </div>
+        `;
+      }
       clearSelection();
     } catch (e) {
       console.error(e);
