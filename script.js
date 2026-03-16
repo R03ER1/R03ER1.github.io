@@ -548,6 +548,49 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePriceSummary();
 });
 
+  // Rezervace se spustí 16. 3. 2026 v 18:07 středoevropského času (CET, UTC+1)
+  const reservationTargetUtc = Date.UTC(2026, 2, 16, 17, 7); // měsíce 0-based, březen = 2
+  const reserveButton = document.getElementById("reserve-submit");
+  const reservationCountdown = document.getElementById("reservation-countdown");
+
+  function formatDuration(ms) {
+    if (ms <= 0) return null;
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / (24 * 3600));
+    const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts = [];
+    if (days > 0) parts.push(`${days} d`);
+    if (hours > 0 || days > 0) parts.push(`${hours} h`);
+    if (minutes > 0 || hours > 0 || days > 0) parts.push(`${minutes} min`);
+    parts.push(`${seconds} s`);
+    return parts.join(" ");
+  }
+
+  function updateReservationAvailability() {
+    if (!reserveButton || !reservationCountdown) return;
+
+    const now = Date.now();
+    const diff = reservationTargetUtc - now;
+
+    if (diff <= 0) {
+      reserveButton.disabled = false;
+      reservationCountdown.textContent =
+        "Rezervace jsou spuštěné. Můžete si vybrat místa a pokračovat v rezervaci.";
+      return;
+    }
+
+    reserveButton.disabled = true;
+    const durationText = formatDuration(diff);
+    reservationCountdown.textContent =
+      `Rezervace se spustí 16. března 2026 v 18:07. Zbývá přibližně ${durationText}.`;
+  }
+
+  updateReservationAvailability();
+  setInterval(updateReservationAvailability, 1000);
+
 function updatePriceSummary() {
   const roomSelect = document.getElementById("room");
   const priceRoom1Count = document.getElementById("price-room1-count");
