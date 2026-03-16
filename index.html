@@ -14,14 +14,14 @@
 
   <main class="container">
     <section class="form-section">
-      <h2>Rezervační formulář</h2>
+      <h2>Rezervační formulář</h2> 
       <form id="reservation-form">
         <div class="form-group">
           <label for="name">Jméno a příjmení (povinné)</label>
-          <input type="text" id="name" name="name" required placeholder="Např. Jan Novák">
+          <input type="text" id="name" name="name" required placeholder="Např. Charlie Kirk">
         </div>
 
-        <div class="form-group">
+        <!--<div class="form-group">
           <label for="standing-count">Počet stání</label>
           <input
             type="number"
@@ -32,7 +32,7 @@
             value="1"
           >
           <p class="hint">Zadejte, kolik míst na stání chcete k této rezervaci přidat. Výchozí hodnota je 1.</p>
-        </div>
+        </div>-->
 
         <div class="form-group">
           <label for="room">Sál</label>
@@ -50,7 +50,41 @@
         <div class="form-group">
           <label>Výběr míst u stolu</label>
           <p class="hint">Kliknutím vyberte jedno nebo více míst. Zelená = volné, červená = obsazené.</p>
+          <p class="hint">Pokud chcete rezervovat místa na více stolech, vyplňte formulář dvakrát na stejné jméno. (rezervace se sčítají)</p>
           <div id="seats-container" class="seats-container"></div>
+        </div>
+
+        <div class="form-group" id="price-summary">
+          <h3 style="font-size:0.95rem; margin-bottom:4px;">Přehled ceny</h3>
+          <table style="width:100%; border-collapse:collapse; font-size:0.85rem; background:white; border-radius:8px; overflow:hidden;">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #e5e7eb;">Typ</th>
+                <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #e5e7eb;">Počet lístků</th>
+                <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #e5e7eb;">Cena za kus</th>
+                <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #e5e7eb;">Cena celkem</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:4px 6px;">Hlavní sál (modrý)</td>
+                <td id="price-room1-count" style="padding:4px 6px; text-align:right;">0</td>
+                <td style="padding:4px 6px; text-align:right;">450 Kč</td>
+                <td id="price-room1-total" style="padding:4px 6px; text-align:right;">0 Kč</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 6px;">Malý sál (žlutý)</td>
+                <td id="price-room2-count" style="padding:4px 6px; text-align:right;">0</td>
+                <td style="padding:4px 6px; text-align:right;">420 Kč</td>
+                <td id="price-room2-total" style="padding:4px 6px; text-align:right;">0 Kč</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding:4px 6px; text-align:right; font-weight:600; border-top:1px solid #e5e7eb;">Celkem k zaplacení</td>
+                <td id="price-total" style="padding:4px 6px; text-align:right; font-weight:700;">0 Kč</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="hint" style="margin-top:4px;">Cena za stání není v této částce zahrnuta.</p>
         </div>
 
         <div class="form-actions">

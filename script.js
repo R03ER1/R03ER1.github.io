@@ -122,6 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePeopleTableBtn = document.getElementById("toggle-people-table");
   const peopleTableContainer = document.getElementById("people-table-container");
   const peopleTableBody = document.getElementById("people-table-body");
+  const priceRoom1Count = document.getElementById("price-room1-count");
+  const priceRoom1Total = document.getElementById("price-room1-total");
+  const priceRoom2Count = document.getElementById("price-room2-count");
+  const priceRoom2Total = document.getElementById("price-room2-total");
+  const priceTotal = document.getElementById("price-total");
 
   let selectedSeatNumbers = new Set();
 
@@ -198,6 +203,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       seatsContainer.appendChild(btn);
     }
+
+    updatePriceSummary();
   }
 
   function toggleSeatSelection(seatNumber, element) {
@@ -210,6 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
       element.classList.remove("free");
       element.classList.add("selected");
     }
+
+    updatePriceSummary();
   }
 
   function clearSelection() {
@@ -221,6 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.classList.add("free");
       }
     });
+
+    updatePriceSummary();
   }
 
   function renderTakenSeatsInfo() {
@@ -403,11 +414,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".map-image").forEach((imgDiv) => {
       imgDiv.classList.toggle("hidden", imgDiv.dataset.room !== roomId);
     });
+
+    updatePriceSummary();
   });
 
   tableSelect.addEventListener("change", () => {
     renderSeats();
     renderTakenSeatsInfo();
+    updatePriceSummary();
   });
 
   if (togglePublicTableBtn && publicTableContainer) {
@@ -495,7 +509,54 @@ document.addEventListener("DOMContentLoaded", () => {
   populateTables();
   renderPublicTable();
   renderPeopleTable();
+  updatePriceSummary();
 });
+
+function updatePriceSummary() {
+  const roomSelect = document.getElementById("room");
+  const priceRoom1Count = document.getElementById("price-room1-count");
+  const priceRoom1Total = document.getElementById("price-room1-total");
+  const priceRoom2Count = document.getElementById("price-room2-count");
+  const priceRoom2Total = document.getElementById("price-room2-total");
+  const priceTotal = document.getElementById("price-total");
+
+  if (
+    !roomSelect ||
+    !priceRoom1Count ||
+    !priceRoom1Total ||
+    !priceRoom2Count ||
+    !priceRoom2Total ||
+    !priceTotal
+  ) {
+    return;
+  }
+
+  const currentRoomId = roomSelect.value;
+  const seatButtons = document.querySelectorAll(".seat.selected");
+  const selectedCount = seatButtons.length;
+
+  const room1Price = 450;
+  const room2Price = 420;
+
+  let countRoom1 = 0;
+  let countRoom2 = 0;
+
+  if (currentRoomId === "room1") {
+    countRoom1 = selectedCount;
+  } else if (currentRoomId === "room2") {
+    countRoom2 = selectedCount;
+  }
+
+  const totalRoom1 = countRoom1 * room1Price;
+  const totalRoom2 = countRoom2 * room2Price;
+  const total = totalRoom1 + totalRoom2;
+
+  priceRoom1Count.textContent = countRoom1.toString();
+  priceRoom1Total.textContent = `${totalRoom1} Kč`;
+  priceRoom2Count.textContent = countRoom2.toString();
+  priceRoom2Total.textContent = `${totalRoom2} Kč`;
+  priceTotal.textContent = `${total} Kč`;
+}
 
 function renderPublicTable() {
   const body = document.getElementById("public-table-body");
