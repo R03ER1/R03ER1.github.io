@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tableSelect = document.getElementById("table");
   const seatsContainer = document.getElementById("seats-container");
   const formMessage = document.getElementById("form-message");
+  const reserveMoreBtn = document.getElementById("reserve-more");
   const clearSelectionBtn = document.getElementById("clear-selection");
   const takenSeatsDiv = document.getElementById("taken-seats");
   const downloadCsvBtn = document.getElementById("download-csv");
@@ -205,6 +206,10 @@ document.addEventListener("DOMContentLoaded", () => {
       element.classList.remove("free");
       element.classList.add("selected");
     }
+
+    if (reserveMoreBtn) {
+      reserveMoreBtn.disabled = selectedSeatNumbers.size === 0;
+    }
   }
 
   function clearSelection() {
@@ -216,6 +221,9 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.classList.add("free");
       }
     });
+    if (reserveMoreBtn) {
+      reserveMoreBtn.disabled = true;
+    }
   }
 
   function renderTakenSeatsInfo() {
@@ -262,9 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Odeslání formuláře – zápis do Firestore
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  async function processReservation(showNextTableMessage) {
     formMessage.textContent = "";
     formMessage.className = "form-message";
 
@@ -327,7 +333,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       await Promise.all(promises);
 
-      formMessage.textContent = "Rezervace proběhla úspěšně. Děkujeme!";
+      formMessage.textContent = showNextTableMessage
+        ? "Místa u tohoto stolu jsou zarezervovaná. Můžete vybrat další stůl."
+        : "Rezervace proběhla úspěšně. Děkujeme!";
       formMessage.classList.add("success");
       clearSelection();
     } catch (e) {
@@ -335,7 +343,19 @@ document.addEventListener("DOMContentLoaded", () => {
       formMessage.textContent = "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
       formMessage.classList.add("error");
     }
+  }
+
+  // Odeslání formuláře – zápis do Firestore
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await processReservation(false);
   });
+
+  if (reserveMoreBtn) {
+    reserveMoreBtn.addEventListener("click", async () => {
+      await processReservation(true);
+    });
+  }
 
   if (clearSelectionBtn) {
     clearSelectionBtn.addEventListener("click", () => {
