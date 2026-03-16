@@ -122,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
   const publicTableContainer = document.getElementById("public-table-container");
   const publicTableBody = document.getElementById("public-table-body");
-  const togglePeopleTableBtn = document.getElementById("toggle-people-table");
   const peopleTableContainer = document.getElementById("people-table-container");
   const peopleTableBody = document.getElementById("people-table-body");
   const priceRoom1Count = document.getElementById("price-room1-count");
@@ -482,19 +481,6 @@ document.addEventListener("DOMContentLoaded", () => {
         : "Zobrazit přehled všech míst";
       if (isHidden) {
         renderPublicTable();
-      }
-    });
-  }
-
-  if (togglePeopleTableBtn && peopleTableContainer) {
-    togglePeopleTableBtn.addEventListener("click", () => {
-      const isHidden = peopleTableContainer.classList.contains("hidden");
-      peopleTableContainer.classList.toggle("hidden", !isHidden);
-      togglePeopleTableBtn.textContent = isHidden
-        ? "Skrýt přehled podle lidí"
-        : "Zobrazit přehled podle lidí";
-      if (isHidden) {
-        renderPeopleTable();
       }
     });
   }
