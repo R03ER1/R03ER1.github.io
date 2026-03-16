@@ -134,6 +134,15 @@ select:focus {
   transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
 }
 
+.btn:disabled,
+.btn[disabled] {
+  background: #d1d5db !important;
+  color: #6b7280 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn.primary {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;

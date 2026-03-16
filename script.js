@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reserveButton.disabled = true;
     const durationText = formatDuration(diff);
     reservationCountdown.textContent =
-      `Rezervace se spustí 18. března 2026 v 17:00. Zbývá přibližně ${durationText}.`;
+      `Rezervace se spustí **18. března 2026 v 17:00**. Zbývá přibližně ${durationText}.`;
   }
 
   updateReservationAvailability();
