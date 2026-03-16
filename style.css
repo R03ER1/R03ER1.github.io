@@ -296,6 +296,24 @@ select:focus {
   font-weight: 600;
 }
 
+/* Jemná animace pro rozklikávací řádky v tabulkách */
+.details-row {
+  transition: max-height 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+  overflow: hidden;
+}
+
+.details-row.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.details-row.expanded {
+  max-height: 260px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .footer {
   max-width: 1200px;
   margin: 0 auto 24px;

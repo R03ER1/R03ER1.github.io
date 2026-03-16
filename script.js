@@ -584,8 +584,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     reserveButton.disabled = true;
     const durationText = formatDuration(diff);
-    reservationCountdown.textContent =
-      `Rezervace se spustí 18. března 2026 v 17:00. Zbývá <b>${durationText}</b>.`;
+    reservationCountdown.innerHTML =
+      `Rezervace se spustí <strong>18. března 2026 v 17:00</strong>. Zbývá <strong>${durationText}</strong>.`;
   }
 
   updateReservationAvailability();
@@ -769,9 +769,9 @@ async function renderPeopleTable() {
     tr.appendChild(tdRoom2);
     tr.appendChild(tdRemaining);
 
-    // Detailní řádek s konkrétními místy
+    // Detailní řádek s konkrétními místy (s animací rozbalení)
     const detailTr = document.createElement("tr");
-    detailTr.style.display = "none";
+    detailTr.className = "details-row collapsed";
     const detailTd = document.createElement("td");
     detailTd.colSpan = 5;
     detailTd.style.padding = "6px 8px 10px 8px";
@@ -814,8 +814,9 @@ async function renderPeopleTable() {
     detailTr.appendChild(detailTd);
 
     tr.addEventListener("click", () => {
-      const isHidden = detailTr.style.display === "none";
-      detailTr.style.display = isHidden ? "table-row" : "none";
+      const isCollapsed = detailTr.classList.contains("collapsed");
+      detailTr.classList.toggle("collapsed", !isCollapsed);
+      detailTr.classList.toggle("expanded", isCollapsed);
     });
 
     body.appendChild(tr);
