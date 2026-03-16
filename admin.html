@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Správa rezervací - maturitní ples</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Správa databáze rezervací</h1>
+    <p>Tato stránka je určena pouze pro organizátory.</p>
+  </header>
+
+  <main class="container" style="grid-template-columns: minmax(0, 1fr);">
+    <section class="form-section" id="password-section">
+      <h2>Přihlášení</h2>
+      <p class="hint">Zadejte heslo pro správu databáze.</p>
+      <div class="form-group">
+        <label for="admin-password">Heslo</label>
+        <input type="password" id="admin-password" placeholder="Heslo">
+      </div>
+      <div class="form-actions">
+        <button id="admin-login" class="btn primary">Přihlásit</button>
+        <a href="index.html" class="btn secondary">Zpět na rezervace</a>
+      </div>
+      <p id="password-message" class="form-message"></p>
+    </section>
+
+    <section class="form-section hidden" id="admin-section">
+      <h2>Přehled všech míst</h2>
+      <p class="hint">Vidíte všechna místa ve všech sálech. Červené = obsazené, zelené = volné.</p>
+
+      <div class="form-actions">
+        <button id="clear-all" class="btn export">Vymazat všechny rezervace</button>
+        <a href="index.html" class="btn secondary">Zpět na rezervace</a>
+      </div>
+
+      <div id="admin-table-wrapper" style="margin-top:16px; max-height: 480px; overflow:auto;">
+        <table id="admin-table" style="width:100%; border-collapse: collapse; font-size:0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Sál</th>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Stůl</th>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Místo</th>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Stav</th>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Akce</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+          </tbody>
+        </table>
+      </div>
+
+      <p id="admin-message" class="form-message"></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Robert Sadílek 2026 – administrační rozhraní</p>
+  </footer>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
+
