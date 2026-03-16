@@ -548,8 +548,12 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePriceSummary();
 });
 
-  // Rezervace se spustí 18. 3. 2026 v 17:00 středoevropského času (CET, UTC+1)
-  const reservationTargetUtc = Date.UTC(2026, 2, 18, 16, 0); // měsíce 0-based, březen = 2
+  // Odemčení rezervací:
+  // - do 16. 3. 2026 22:00 CET (21:00 UTC) povoleno pro organizátory
+  // - od 16. 3. 2026 22:00 CET do 18. 3. 2026 17:00 CET zamknuto s odpočtem
+  // - po 18. 3. 2026 17:00 CET trvale odemčeno
+  const orgAccessUntilUtc = Date.UTC(2026, 2, 16, 21, 0); // 16. 3. 2026 22:00 CET
+  const publicAccessFromUtc = Date.UTC(2026, 2, 18, 16, 0); // 18. 3. 2026 17:00 CET
   const reserveButton = document.getElementById("reserve-submit");
   const reservationCountdown = document.getElementById("reservation-countdown");
 
@@ -573,19 +577,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!reserveButton || !reservationCountdown) return;
 
     const now = Date.now();
-    const diff = reservationTargetUtc - now;
+    const diffToOrgEnd = orgAccessUntilUtc - now;
+    const diffToPublicStart = publicAccessFromUtc - now;
 
-    if (diff <= 0) {
+    // 1) Do 16. 3. 2026 22:00 CET – povoleno, info pro organizátory
+    if (now < orgAccessUntilUtc) {
       reserveButton.disabled = false;
       reservationCountdown.textContent =
-        "Rezervace jsou spuštěné. Můžete si vybrat místa a pokračovat v rezervaci.";
+        "Rezervace jsou aktuálně otevřené (režim pro organizátory). Od 16. března 2026 ve 22:00 budou dočasně uzavřeny a znovu spuštěny pro veřejnost.";
       return;
     }
 
-    reserveButton.disabled = true;
-    const durationText = formatDuration(diff);
-    reservationCountdown.innerHTML =
-      `Rezervace se spustí <strong>18. března 2026 v 17:00</strong>. Zbývá <strong>${durationText}</strong>.`;
+    // 2) Od 16. 3. 2026 22:00 CET do 18. 3. 2026 17:00 CET – zamknuto s odpočtem
+    if (now >= orgAccessUntilUtc && now < publicAccessFromUtc) {
+      reserveButton.disabled = true;
+      const durationText = formatDuration(diffToPublicStart);
+      reservationCountdown.innerHTML =
+        `Rezervace pro veřejnost se spustí <strong>18. března 2026 v 17:00</strong>. Zbývá <strong>${durationText}</strong>.`;
+      return;
+    }
+
+    // 3) Po 18. 3. 2026 17:00 CET – trvale odemčeno
+    reserveButton.disabled = false;
+    reservationCountdown.textContent =
+      "Rezervace jsou spuštěné. Můžete si vybrat místa a pokračovat v rezervaci.";
   }
 
   updateReservationAvailability();
