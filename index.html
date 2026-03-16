@@ -22,6 +22,19 @@
         </div>
 
         <div class="form-group">
+          <label for="standing-count">Počet stání</label>
+          <input
+            type="number"
+            id="standing-count"
+            name="standing-count"
+            min="0"
+            step="1"
+            value="1"
+          >
+          <p class="hint">Zadejte, kolik míst na stání chcete k této rezervaci přidat. Výchozí hodnota je 1.</p>
+        </div>
+
+        <div class="form-group">
           <label for="room">Sál</label>
           <select id="room" name="room">
             <option value="room1">Hlavní sál (modrý)</option>

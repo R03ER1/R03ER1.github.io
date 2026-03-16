@@ -108,6 +108,7 @@ function getFreeSeatCount(roomId, table) {
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("reservation-form");
   const nameInput = document.getElementById("name");
+  const standingCountInput = document.getElementById("standing-count");
   const roomSelect = document.getElementById("room");
   const tableSelect = document.getElementById("table");
   const seatsContainer = document.getElementById("seats-container");
@@ -276,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (selectedSeatNumbers.size === 0) {
-      formMessage.textContent = "Vyberte alespoň jedno volné místo.";
+      formMessage.textContent = "Vyberte alespoň jedno volné místo u stolu.";
       formMessage.classList.add("error");
       return;
     }
@@ -314,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nowIso = new Date().toISOString();
     try {
-      // Zapíšeme každé vybrané místo jako samostatný dokument
+      // Zapíšeme každé vybrané místo u stolu jako samostatný dokument
       const promises = Array.from(selectedSeatNumbers).map((seatNumber) =>
         addDoc(reservationsCol, {
           name,
@@ -325,6 +326,50 @@ document.addEventListener("DOMContentLoaded", () => {
           createdAt: nowIso,
         })
       );
+
+      // Přidáme také místa na stání jako speciální "sál" Stání, stůl 0
+      const standingCountRaw = standingCountInput ? standingCountInput.value : "0";
+      const standingCount = Math.max(
+        0,
+        Number.isNaN(parseInt(standingCountRaw, 10))
+          ? 0
+          : parseInt(standingCountRaw, 10)
+      );
+
+      if (standingCount > 0) {
+        const standingRoomId = "Stání";
+        const standingTableId = "standing-0";
+        const standingTableNumber = 0;
+
+        const existingStanding = reservations.filter(
+          (r) => r.roomId === standingRoomId && r.tableId === standingTableId
+        );
+        let maxSeatNumber =
+          existingStanding.length === 0
+            ? 0
+            : existingStanding.reduce(
+                (max, r) =>
+                  typeof r.seatNumber === "number" && !Number.isNaN(r.seatNumber)
+                    ? Math.max(max, r.seatNumber)
+                    : max,
+                0
+              );
+
+        for (let i = 0; i < standingCount; i++) {
+          maxSeatNumber += 1;
+          promises.push(
+            addDoc(reservationsCol, {
+              name,
+              roomId: standingRoomId,
+              tableId: standingTableId,
+              tableNumber: standingTableNumber,
+              seatNumber: maxSeatNumber,
+              createdAt: nowIso,
+            })
+          );
+        }
+      }
+
       await Promise.all(promises);
 
       formMessage.textContent = "Rezervace proběhla úspěšně. Děkujeme!";
