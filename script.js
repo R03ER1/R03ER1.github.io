@@ -115,6 +115,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearSelectionBtn = document.getElementById("clear-selection");
   const takenSeatsDiv = document.getElementById("taken-seats");
   const downloadCsvBtn = document.getElementById("download-csv");
+  const togglePublicTableBtn = document.getElementById("toggle-public-table");
+  const publicTableContainer = document.getElementById("public-table-container");
+  const publicTableBody = document.getElementById("public-table-body");
 
   let selectedSeatNumbers = new Set();
 
@@ -125,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     populateTables(true);
     renderSeats();
     renderTakenSeatsInfo();
+    renderPublicTable();
   });
 
   function populateTables(keepSelection = false) {
@@ -355,6 +359,17 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTakenSeatsInfo();
   });
 
+  togglePublicTableBtn.addEventListener("click", () => {
+    const isHidden = publicTableContainer.classList.contains("hidden");
+    publicTableContainer.classList.toggle("hidden", !isHidden);
+    togglePublicTableBtn.textContent = isHidden
+      ? "Skrýt přehled všech míst"
+      : "Zobrazit přehled všech míst";
+    if (isHidden) {
+      renderPublicTable();
+    }
+  });
+
   // Export CSV používá globální "reservations" z Firestore
   downloadCsvBtn.addEventListener("click", () => {
     if (reservations.length === 0) {
@@ -412,4 +427,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // start
   populateTables();
+  renderPublicTable();
 });
+
+function renderPublicTable() {
+  const body = document.getElementById("public-table-body");
+  if (!body) return;
+  body.innerHTML = "";
+
+  const allRows = [];
+
+  Object.values(ROOMS).forEach((room) => {
+    room.tables.forEach((table) => {
+      for (let seat = 1; seat <= table.seatCount; seat++) {
+        const res = reservations.find(
+          (r) =>
+            r.roomId === room.id &&
+            r.tableId === table.id &&
+            r.seatNumber === seat
+        );
+
+        const tr = document.createElement("tr");
+        tr.style.background = res ? "#fef2f2" : "#ecfdf3";
+
+        const tdRoom = document.createElement("td");
+        tdRoom.textContent = room.name;
+        tdRoom.style.padding = "4px 6px";
+
+        const tdTable = document.createElement("td");
+        tdTable.textContent = table.number;
+        tdTable.style.padding = "4px 6px";
+
+        const tdSeat = document.createElement("td");
+        tdSeat.textContent = seat;
+        tdSeat.style.padding = "4px 6px";
+
+        const tdStatus = document.createElement("td");
+        tdStatus.style.padding = "4px 6px";
+        tdStatus.textContent = res ? `Obsazeno – ${res.name}` : "Volné";
+
+        tr.appendChild(tdRoom);
+        tr.appendChild(tdTable);
+        tr.appendChild(tdSeat);
+        tr.appendChild(tdStatus);
+
+        allRows.push(tr);
+      }
+    });
+  });
+
+  allRows.forEach((row) => body.appendChild(row));
+}

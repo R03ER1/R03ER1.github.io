@@ -78,6 +78,23 @@
     <h2>Export rezervací</h2>
     <p>Organizátoři si mohou stáhnout všechny rezervace jako CSV soubor (pro Excel / Google Sheets).</p>
     <button id="download-csv" class="btn export">Stáhnout rezervace jako CSV</button>
+    <div style="margin-top:16px;">
+      <button id="toggle-public-table" class="btn secondary">Zobrazit přehled všech míst</button>
+    </div>
+    <div id="public-table-container" class="hidden" style="margin-top:16px; max-height:420px; overflow:auto;">
+      <table id="public-table" style="width:100%; border-collapse:collapse; font-size:0.85rem; background:white; border-radius:12px; overflow:hidden;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Sál</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Stůl</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Místo</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Stav</th>
+          </tr>
+        </thead>
+        <tbody id="public-table-body">
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <footer class="footer">
