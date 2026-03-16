@@ -769,9 +769,9 @@ async function renderPeopleTable() {
     tr.appendChild(tdRoom2);
     tr.appendChild(tdRemaining);
 
-    // Detailní řádek s konkrétními místy (s animací rozbalení)
+    // Detailní řádek s konkrétními místy
     const detailTr = document.createElement("tr");
-    detailTr.className = "details-row collapsed";
+    detailTr.style.display = "none";
     const detailTd = document.createElement("td");
     detailTd.colSpan = 5;
     detailTd.style.padding = "6px 8px 10px 8px";
@@ -814,9 +814,16 @@ async function renderPeopleTable() {
     detailTr.appendChild(detailTd);
 
     tr.addEventListener("click", () => {
-      const isCollapsed = detailTr.classList.contains("collapsed");
-      detailTr.classList.toggle("collapsed", !isCollapsed);
-      detailTr.classList.toggle("expanded", isCollapsed);
+      const isHidden = detailTr.style.display === "none";
+      if (isHidden) {
+        detailTr.style.display = "table-row";
+        detailTr.classList.add("details-row-fade-in");
+        setTimeout(() => {
+          detailTr.classList.remove("details-row-fade-in");
+        }, 200);
+      } else {
+        detailTr.style.display = "none";
+      }
     });
 
     body.appendChild(tr);
