@@ -137,12 +137,43 @@ document.addEventListener("DOMContentLoaded", () => {
   // přijdou nové data všem uživatelům
   onSnapshot(reservationsCol, (snapshot) => {
     reservations = snapshot.docs.map((doc) => doc.data());
+    updateRoomOptions();
     populateTables(true);
     renderSeats();
     renderTakenSeatsInfo();
     renderPublicTable();
     renderPeopleTable();
   });
+
+  function getRoomSeatStats(roomId) {
+    const room = ROOMS[roomId];
+    if (!room) {
+      return { total: 0, taken: 0, free: 0 };
+    }
+
+    const total = room.tables.reduce((sum, table) => sum + table.seatCount, 0);
+    const taken = reservations.filter(
+      (r) => r.roomId === roomId && r.roomId !== "Stání"
+    ).length;
+    const free = Math.max(0, total - taken);
+    return { total, taken, free };
+  }
+
+  function updateRoomOptions() {
+    if (!roomSelect) return;
+
+    Object.values(ROOMS).forEach((room) => {
+      let option = roomSelect.querySelector(`option[value="${room.id}"]`);
+      if (!option) {
+        option = document.createElement("option");
+        option.value = room.id;
+        roomSelect.appendChild(option);
+      }
+
+      const { free, total } = getRoomSeatStats(room.id);
+      option.textContent = `${room.name} (${free}/${total})`;
+    });
+  }
 
   function populateTables(keepSelection = false) {
     const roomId = roomSelect.value;
@@ -524,6 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // start
+  updateRoomOptions();
   populateTables();
   renderPublicTable();
   renderPeopleTable();
