@@ -5,6 +5,7 @@ import {
   collection,
   addDoc,
   onSnapshot,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -44,6 +45,7 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 const reservationsCol = collection(db, "reservations");
+const paymentsCol = collection(db, "payments");
 
 // ---------- Konfigurace stolů ----------
 // Počty míst u konkrétních stolů – pokud nesedí podle plánku, změň hodnoty tady.
@@ -623,7 +625,7 @@ function renderPublicTable() {
   allRows.forEach((row) => body.appendChild(row));
 }
 
-function renderPeopleTable() {
+async function renderPeopleTable() {
   const body = document.getElementById("people-table-body");
   if (!body) return;
   body.innerHTML = "";
@@ -640,6 +642,7 @@ function renderPeopleTable() {
         room1: 0,
         room2: 0,
         standing: 0,
+        totalDue: 0,
       });
     }
 
@@ -648,11 +651,23 @@ function renderPeopleTable() {
 
     if (r.roomId === "room1") {
       stats.room1 += 1;
+      stats.totalDue += 450;
     } else if (r.roomId === "room2") {
       stats.room2 += 1;
+      stats.totalDue += 420;
     } else if (r.roomId === "Stání") {
       stats.standing += 1;
     }
+  });
+
+  // Načteme informace o již provedených platbách
+  const paymentsSnapshot = await getDocs(paymentsCol);
+  const paymentsByName = new Map();
+  paymentsSnapshot.docs.forEach((d) => {
+    const data = d.data();
+    const name = (data.name || d.id || "").trim();
+    if (!name) return;
+    paymentsByName.set(name, Number(data.totalPaid) || 0);
   });
 
   const sortedNames = Array.from(statsByName.keys()).sort((a, b) =>
@@ -661,6 +676,8 @@ function renderPeopleTable() {
 
   sortedNames.forEach((name) => {
     const stats = statsByName.get(name);
+    const paid = paymentsByName.get(name) || 0;
+    const remaining = Math.max(0, stats.totalDue - paid);
     const tr = document.createElement("tr");
 
     const tdName = document.createElement("td");
@@ -679,15 +696,16 @@ function renderPeopleTable() {
     tdRoom2.textContent = stats.room2.toString();
     tdRoom2.style.padding = "4px 6px";
 
-    const tdStanding = document.createElement("td");
-    tdStanding.textContent = stats.standing.toString();
-    tdStanding.style.padding = "4px 6px";
+    const tdRemaining = document.createElement("td");
+    tdRemaining.textContent = `${remaining} Kč`;
+    tdRemaining.style.padding = "4px 6px";
+    tdRemaining.style.color = remaining === 0 ? "#16a34a" : "#b91c1c";
 
     tr.appendChild(tdName);
     tr.appendChild(tdTotal);
     tr.appendChild(tdRoom1);
     tr.appendChild(tdRoom2);
-    tr.appendChild(tdStanding);
+    tr.appendChild(tdRemaining);
 
     body.appendChild(tr);
   });
