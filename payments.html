@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platby – maturitní ples</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Platby za lístky</h1>
+    <p>Tato stránka je určena pouze pro organizátory. Umožňuje sledovat, kdo kolik má zaplatit, kolik už zaplatil a kolik zbývá.</p>
+  </header>
+
+  <main class="container" style="grid-template-columns: minmax(0, 1fr);">
+    <section class="form-section" id="password-section">
+      <h2>Přihlášení</h2>
+      <p class="hint">Zadejte heslo pro správu plateb.</p>
+      <div class="form-group">
+        <label for="payments-password">Heslo</label>
+        <input type="password" id="payments-password" placeholder="Heslo">
+      </div>
+      <div class="form-actions">
+        <button id="payments-login" class="btn primary">Přihlásit</button>
+        <a href="index.html" class="btn secondary">Zpět na rezervace</a>
+      </div>
+      <p id="password-message" class="form-message"></p>
+    </section>
+
+    <section class="form-section hidden" id="payments-section">
+      <h2>Přehled plateb podle lidí</h2>
+      <p class="hint">Cena se počítá jen z míst u stolů (hlavní sál 450 Kč, malý sál 420 Kč). Stání se do ceny nezapočítává.</p>
+
+      <div id="payments-table-wrapper" style="margin-top:16px; max-height: 480px; overflow:auto;">
+        <table id="payments-table" style="width:100%; border-collapse: collapse; font-size:0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Jméno</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e7eb;">Kolik má platit</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e7eb;">Kolik už zaplatil</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e7eb;">Kolik zbývá zaplatit</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e7eb;">Nová platba</th>
+              <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Akce</th>
+            </tr>
+          </thead>
+          <tbody id="payments-table-body">
+          </tbody>
+        </table>
+      </div>
+
+      <p id="payments-message" class="form-message"></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Robert Sadílek 2026 – správa plateb</p>
+  </footer>
+
+  <script type="module" src="payments.js"></script>
+</body>
+</html>
+
