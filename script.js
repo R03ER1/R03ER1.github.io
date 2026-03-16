@@ -361,16 +361,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTakenSeatsInfo();
   });
 
-  togglePublicTableBtn.addEventListener("click", () => {
-    const isHidden = publicTableContainer.classList.contains("hidden");
-    publicTableContainer.classList.toggle("hidden", !isHidden);
-    togglePublicTableBtn.textContent = isHidden
-      ? "Skrýt přehled všech míst"
-      : "Zobrazit přehled všech míst";
-    if (isHidden) {
-      renderPublicTable();
-    }
-  });
+  if (togglePublicTableBtn && publicTableContainer) {
+    togglePublicTableBtn.addEventListener("click", () => {
+      const isHidden = publicTableContainer.classList.contains("hidden");
+      publicTableContainer.classList.toggle("hidden", !isHidden);
+      togglePublicTableBtn.textContent = isHidden
+        ? "Skrýt přehled všech míst"
+        : "Zobrazit přehled všech míst";
+      if (isHidden) {
+        renderPublicTable();
+      }
+    });
+  }
 
   // Export CSV používá globální "reservations" z Firestore
   downloadCsvBtn.addEventListener("click", () => {
