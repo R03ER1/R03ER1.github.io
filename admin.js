@@ -179,7 +179,60 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // seřazení: nejdřív room1, pak room2, v rámci podle čísla stolu a místa
+    // Přidáme také řádky pro místa na stání (speciální "sál" Stání, stůl 0)
+    const standingReservations = reservations
+      .filter((r) => r.roomId === "Stání")
+      .sort((a, b) => (a.seatNumber || 0) - (b.seatNumber || 0));
+
+    standingReservations.forEach((res) => {
+      const tr = document.createElement("tr");
+      tr.style.background = "#fef2f2";
+
+      const tdRoom = document.createElement("td");
+      tdRoom.textContent = "Stání";
+      tdRoom.style.padding = "4px 6px";
+
+      const tdTable = document.createElement("td");
+      tdTable.textContent = "0";
+      tdTable.style.padding = "4px 6px";
+
+      const tdSeat = document.createElement("td");
+      tdSeat.textContent = String(res.seatNumber ?? "");
+      tdSeat.style.padding = "4px 6px";
+
+      const tdStatus = document.createElement("td");
+      tdStatus.style.padding = "4px 6px";
+      tdStatus.textContent = `Obsazeno – ${res.name ?? ""}`;
+
+      const tdAction = document.createElement("td");
+      tdAction.style.padding = "4px 6px";
+
+      const btn = document.createElement("button");
+      btn.textContent = "Zrušit";
+      btn.className = "btn secondary";
+      btn.style.padding = "4px 10px";
+      btn.style.fontSize = "0.75rem";
+      btn.addEventListener("click", async () => {
+        if (
+          !confirm(
+            `Opravdu zrušit rezervaci stání (místo ${res.seatNumber}) pro ${res.name}?`
+          )
+        ) {
+          return;
+        }
+        await deleteReservation(res.id);
+      });
+      tdAction.appendChild(btn);
+
+      tr.appendChild(tdRoom);
+      tr.appendChild(tdTable);
+      tr.appendChild(tdSeat);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdAction);
+
+      allRows.push(tr);
+    });
+
     allRows.forEach((row) => tableBody.appendChild(row));
   }
 
