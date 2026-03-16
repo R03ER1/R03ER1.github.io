@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rezervace míst na maturitní ples</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Rezervace míst na maturitní ples</h1>
+    <p>Vyberte si stůl a konkrétní místa v hlavním (modrém) nebo malém (žlutém) sále.</p>
+  </header>
+
+  <main class="container">
+    <section class="form-section">
+      <h2>Rezervační formulář</h2>
+      <form id="reservation-form">
+        <div class="form-group">
+          <label for="name">Jméno a příjmení (povinné)</label>
+          <input type="text" id="name" name="name" required placeholder="Např. Jan Novák">
+        </div>
+
+        <div class="form-group">
+          <label for="room">Sál</label>
+          <select id="room" name="room">
+            <option value="room1">Hlavní sál (modrý)</option>
+            <option value="room2">Malý sál (žlutý)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="table">Stůl</label>
+          <select id="table" name="table"></select>
+        </div>
+
+        <div class="form-group">
+          <label>Výběr míst u stolu</label>
+          <p class="hint">Kliknutím vyberte jedno nebo více míst. Zelená = volné, červená = obsazené.</p>
+          <div id="seats-container" class="seats-container"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Rezervovat vybraná místa</button>
+          <button type="button" id="clear-selection" class="btn secondary">Zrušit výběr míst</button>
+        </div>
+
+        <p id="form-message" class="form-message"></p>
+      </form>
+    </section>
+
+    <section class="map-section">
+      <h2>Přehled sálů</h2>
+      <div class="map-tabs">
+        <button class="tab-button active" data-room="room1">Hlavní sál (modrý)</button>
+        <button class="tab-button" data-room="room2">Malý sál (žlutý)</button>
+      </div>
+
+      <div class="map-wrapper">
+        <div class="map-image" data-room="room1">
+          <img src="img/room1.jpg" alt="Rozmístění stolů - hlavní sál (modrý)">
+        </div>
+        <div class="map-image hidden" data-room="room2">
+          <img src="img/room2.jpg" alt="Rozmístění stolů - malý sál (žlutý)">
+        </div>
+      </div>
+
+      <section class="taken-seats-section">
+        <h2>Mapa obsazených míst</h2>
+        <p class="hint">Vyberte sál a stůl, abyste viděli, která místa jsou už obsazená.</p>
+        <div id="taken-seats" class="taken-seats"></div>
+      </section>
+    </section>
+  </main>
+
+  <section class="export-section">
+    <h2>Export rezervací</h2>
+    <p>Organizátoři si mohou stáhnout všechny rezervace jako CSV soubor (pro Excel / Google Sheets).</p>
+    <button id="download-csv" class="btn export">Stáhnout rezervace jako CSV</button>
+  </section>
+
+  <footer class="footer">
+    <p>Data se ukládají do prohlížeče návštěvníka. Pro sdílené rezervace mezi více lidmi je potřeba nasadit aplikaci na server/databázi.</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
+
