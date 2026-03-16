@@ -548,8 +548,8 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePriceSummary();
 });
 
-  // Rezervace se spustí 16. 3. 2026 v 18:07 středoevropského času (CET, UTC+1)
-  const reservationTargetUtc = Date.UTC(2026, 2, 16, 17, 7); // měsíce 0-based, březen = 2
+  // Rezervace se spustí 18. 3. 2026 v 17:00 středoevropského času (CET, UTC+1)
+  const reservationTargetUtc = Date.UTC(2026, 2, 18, 16, 0); // měsíce 0-based, březen = 2
   const reserveButton = document.getElementById("reserve-submit");
   const reservationCountdown = document.getElementById("reservation-countdown");
 
@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reserveButton.disabled = true;
     const durationText = formatDuration(diff);
     reservationCountdown.textContent =
-      `Rezervace se spustí 16. března 2026 v 18:07. Zbývá přibližně ${durationText}.`;
+      `Rezervace se spustí 18. března 2026 v 17:00. Zbývá přibližně ${durationText}.`;
   }
 
   updateReservationAvailability();
