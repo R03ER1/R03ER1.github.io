@@ -711,6 +711,7 @@ async function renderPeopleTable() {
     const paid = paymentsByName.get(name) || 0;
     const remaining = Math.max(0, stats.totalDue - paid);
     const tr = document.createElement("tr");
+    tr.style.cursor = "pointer";
 
     const tdName = document.createElement("td");
     tdName.textContent = name;
@@ -739,6 +740,56 @@ async function renderPeopleTable() {
     tr.appendChild(tdRoom2);
     tr.appendChild(tdRemaining);
 
+    // Detailní řádek s konkrétními místy
+    const detailTr = document.createElement("tr");
+    detailTr.style.display = "none";
+    const detailTd = document.createElement("td");
+    detailTd.colSpan = 5;
+    detailTd.style.padding = "6px 8px 10px 8px";
+    detailTd.style.backgroundColor = "#f9fafb";
+    detailTd.style.fontSize = "0.8rem";
+
+    const userReservations = reservations
+      .filter((r) => (r.name || "").trim() === name)
+      .sort((a, b) => {
+        if (a.roomId === b.roomId) {
+          if ((a.tableNumber || 0) === (b.tableNumber || 0)) {
+            return (a.seatNumber || 0) - (b.seatNumber || 0);
+          }
+          return (a.tableNumber || 0) - (b.tableNumber || 0);
+        }
+        return (a.roomId || "").localeCompare(b.roomId || "");
+      });
+
+    if (userReservations.length === 0) {
+      detailTd.textContent = "Žádné rezervace.";
+    } else {
+      const list = document.createElement("ul");
+      list.style.margin = "0";
+      list.style.paddingLeft = "18px";
+
+      userReservations.forEach((r) => {
+        const li = document.createElement("li");
+        const roomName = ROOMS[r.roomId]?.name || r.roomId || "";
+        if (r.roomId === "Stání") {
+          li.textContent = `${roomName} – místo ${r.seatNumber}`;
+        } else {
+          li.textContent = `${roomName}, stůl ${r.tableNumber}, místo ${r.seatNumber}`;
+        }
+        list.appendChild(li);
+      });
+
+      detailTd.appendChild(list);
+    }
+
+    detailTr.appendChild(detailTd);
+
+    tr.addEventListener("click", () => {
+      const isHidden = detailTr.style.display === "none";
+      detailTr.style.display = isHidden ? "table-row" : "none";
+    });
+
     body.appendChild(tr);
+    body.appendChild(detailTr);
   });
 }
