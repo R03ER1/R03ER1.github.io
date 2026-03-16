@@ -337,11 +337,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  clearSelectionBtn.addEventListener("click", () => {
-    clearSelection();
-    formMessage.textContent = "";
-    formMessage.className = "form-message";
-  });
+  if (clearSelectionBtn) {
+    clearSelectionBtn.addEventListener("click", () => {
+      clearSelection();
+      formMessage.textContent = "";
+      formMessage.className = "form-message";
+    });
+  }
 
   roomSelect.addEventListener("change", () => {
     populateTables();
