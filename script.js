@@ -46,24 +46,49 @@ const db = getFirestore(app);
 const reservationsCol = collection(db, "reservations");
 
 // ---------- Konfigurace stolů ----------
+// Počty míst u konkrétních stolů – pokud nesedí podle plánku, změň hodnoty tady.
+// Povolené hodnoty: 5, 6, 7, 8, 9, 10, 12
+const ROOM1_TABLE_SEATS = {
+  1: 10,  2: 10,  3: 6,  4: 6,  5: 8, 6: 8,
+  7: 8,  8: 8, 9: 6, 10: 6, 11: 6, 12: 6,
+  13: 6, 14: 6, 15: 9, 16: 10, 17: 10, 18: 10,
+  19: 10, 20: 7, 21: 8, 22: 5,
+  // středové stoly – spíš menší, uprav podle potřeby
+  23: 8, 24: 8, 25: 8, 26: 8, 27: 8, 28: 8,
+  29: 8, 30: 8, 31: 8, 32: 8, 33: 8, 34: 8,
+  35: 8, 36: 8, 37: 8,
+};
+
+const ROOM2_TABLE_SEATS = {
+  1: 10, 2: 10, 3: 10, 4: 10, 5: 10,
+  6: 10,  7: 10,  8: 10,
+  9: 12, 10: 12, 11: 8, 12: 8, 13: 8,
+};
+
 const ROOMS = {
   room1: {
     id: "room1",
     name: "Hlavní sál (modrý)",
-    tables: Array.from({ length: 37 }, (_, i) => ({
-      id: `room1-${i + 1}`,
-      number: i + 1,
-      seatCount: 10,
-    })),
+    tables: Array.from({ length: 37 }, (_, i) => {
+      const number = i + 1;
+      return {
+        id: `room1-${number}`,
+        number,
+        seatCount: ROOM1_TABLE_SEATS[number] ?? 10,
+      };
+    }),
   },
   room2: {
     id: "room2",
     name: "Malý sál (žlutý)",
-    tables: Array.from({ length: 13 }, (_, i) => ({
-      id: `room2-${i + 1}`,
-      number: i + 1,
-      seatCount: 10,
-    })),
+    tables: Array.from({ length: 13 }, (_, i) => {
+      const number = i + 1;
+      return {
+        id: `room2-${number}`,
+        number,
+        seatCount: ROOM2_TABLE_SEATS[number] ?? 10,
+      };
+    }),
   },
 };
 
