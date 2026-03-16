@@ -119,6 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
   const publicTableContainer = document.getElementById("public-table-container");
   const publicTableBody = document.getElementById("public-table-body");
+  const togglePeopleTableBtn = document.getElementById("toggle-people-table");
+  const peopleTableContainer = document.getElementById("people-table-container");
+  const peopleTableBody = document.getElementById("people-table-body");
 
   let selectedSeatNumbers = new Set();
 
@@ -130,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSeats();
     renderTakenSeatsInfo();
     renderPublicTable();
+    renderPeopleTable();
   });
 
   function populateTables(keepSelection = false) {
@@ -419,6 +423,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (togglePeopleTableBtn && peopleTableContainer) {
+    togglePeopleTableBtn.addEventListener("click", () => {
+      const isHidden = peopleTableContainer.classList.contains("hidden");
+      peopleTableContainer.classList.toggle("hidden", !isHidden);
+      togglePeopleTableBtn.textContent = isHidden
+        ? "Skrýt přehled podle lidí"
+        : "Zobrazit přehled podle lidí";
+      if (isHidden) {
+        renderPeopleTable();
+      }
+    });
+  }
+
   // Export CSV používá globální "reservations" z Firestore
   downloadCsvBtn.addEventListener("click", () => {
     if (reservations.length === 0) {
@@ -477,6 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // start
   populateTables();
   renderPublicTable();
+  renderPeopleTable();
 });
 
 function renderPublicTable() {
@@ -526,4 +544,74 @@ function renderPublicTable() {
   });
 
   allRows.forEach((row) => body.appendChild(row));
+}
+
+function renderPeopleTable() {
+  const body = document.getElementById("people-table-body");
+  if (!body) return;
+  body.innerHTML = "";
+
+  const statsByName = new Map();
+
+  reservations.forEach((r) => {
+    const name = (r.name || "").trim();
+    if (!name) return;
+
+    if (!statsByName.has(name)) {
+      statsByName.set(name, {
+        total: 0,
+        room1: 0,
+        room2: 0,
+        standing: 0,
+      });
+    }
+
+    const stats = statsByName.get(name);
+    stats.total += 1;
+
+    if (r.roomId === "room1") {
+      stats.room1 += 1;
+    } else if (r.roomId === "room2") {
+      stats.room2 += 1;
+    } else if (r.roomId === "Stání") {
+      stats.standing += 1;
+    }
+  });
+
+  const sortedNames = Array.from(statsByName.keys()).sort((a, b) =>
+    a.localeCompare(b, "cs", { sensitivity: "base" })
+  );
+
+  sortedNames.forEach((name) => {
+    const stats = statsByName.get(name);
+    const tr = document.createElement("tr");
+
+    const tdName = document.createElement("td");
+    tdName.textContent = name;
+    tdName.style.padding = "4px 6px";
+
+    const tdTotal = document.createElement("td");
+    tdTotal.textContent = stats.total.toString();
+    tdTotal.style.padding = "4px 6px";
+
+    const tdRoom1 = document.createElement("td");
+    tdRoom1.textContent = stats.room1.toString();
+    tdRoom1.style.padding = "4px 6px";
+
+    const tdRoom2 = document.createElement("td");
+    tdRoom2.textContent = stats.room2.toString();
+    tdRoom2.style.padding = "4px 6px";
+
+    const tdStanding = document.createElement("td");
+    tdStanding.textContent = stats.standing.toString();
+    tdStanding.style.padding = "4px 6px";
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdTotal);
+    tr.appendChild(tdRoom1);
+    tr.appendChild(tdRoom2);
+    tr.appendChild(tdStanding);
+
+    body.appendChild(tr);
+  });
 }

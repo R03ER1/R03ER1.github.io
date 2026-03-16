@@ -114,6 +114,25 @@
         </tbody>
       </table>
     </div>
+
+    <div style="margin-top:16px;">
+      <button id="toggle-people-table" class="btn secondary">Zobrazit přehled podle lidí</button>
+    </div>
+    <div id="people-table-container" class="hidden" style="margin-top:16px; max-height:420px; overflow:auto;">
+      <table id="people-table" style="width:100%; border-collapse:collapse; font-size:0.85rem; background:white; border-radius:12px; overflow:hidden;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Jméno</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Míst celkem</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Hlavní sál</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Malý sál</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e7eb;">Stání</th>
+          </tr>
+        </thead>
+        <tbody id="people-table-body">
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <footer class="footer">
