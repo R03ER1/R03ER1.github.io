@@ -7,6 +7,7 @@ import {
   deleteDoc,
   addDoc,
   doc,
+  runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Stejná konfigurace jako v hlavní aplikaci
@@ -206,21 +207,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const nowIso = new Date().toISOString();
+      const selectedSeatArray = Array.from(adminSelectedSeatNumbers);
 
       try {
-        const promises = Array.from(adminSelectedSeatNumbers).map(
-          (seatNumber) =>
-            addDoc(reservationsCol, {
+        // Přidáme místa pomocí transakce, abychom zabránili kolizi
+        await runTransaction(db, async (transaction) => {
+          for (const seatNumber of selectedSeatArray) {
+            const seatDocId = `${room.id}_${table.id}_${seatNumber}`;
+            const seatDocRef = doc(reservationsCol, seatDocId);
+            const seatSnap = await transaction.get(seatDocRef);
+            if (seatSnap.exists()) {
+              throw new Error("seat-already-taken");
+            }
+            transaction.set(seatDocRef, {
               name,
               roomId: room.id,
               tableId: table.id,
               tableNumber: table.number,
               seatNumber,
               createdAt: nowIso,
-            })
-        );
-
-        await Promise.all(promises);
+            });
+          }
+        });
         await loadData();
 
         adminFormMessage.textContent =
@@ -232,9 +240,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (e) {
         console.error(e);
-        adminFormMessage.textContent =
-          "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
-        adminFormMessage.classList.add("error");
+        if (e && e.message === "seat-already-taken") {
+          adminFormMessage.textContent =
+            "Některé z vybraných míst bylo právě obsazeno jiným uživatelem. Obnovte prosím výběr.";
+          adminFormMessage.classList.add("error");
+          renderAdminSeats();
+        } else {
+          adminFormMessage.textContent =
+            "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
+          adminFormMessage.classList.add("error");
+        }
       }
     });
   }

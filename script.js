@@ -6,6 +6,8 @@ import {
   addDoc,
   onSnapshot,
   getDocs,
+  doc,
+  runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -360,18 +362,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const seatCountForPrice = selectedSeatNumbers.size;
     const ticketPricePerSeat = room.id === "room1" ? 450 : 420;
     const totalPrice = seatCountForPrice * ticketPricePerSeat;
+    const selectedSeatArray = Array.from(selectedSeatNumbers);
     try {
-      // Zapíšeme každé vybrané místo u stolu jako samostatný dokument
-      const promises = Array.from(selectedSeatNumbers).map((seatNumber) =>
-        addDoc(reservationsCol, {
-          name,
-          roomId: room.id,
-          tableId: table.id,
-          tableNumber: table.number,
-          seatNumber,
-          createdAt: nowIso,
-        })
-      );
+      // Zapíšeme každé vybrané místo u stolu pomocí transakce,
+      // aby se předešlo dvojímu obsazení stejného místa.
+      await runTransaction(db, async (transaction) => {
+        for (const seatNumber of selectedSeatArray) {
+          const seatDocId = `${room.id}_${table.id}_${seatNumber}`;
+          const seatDocRef = doc(reservationsCol, seatDocId);
+          const seatSnap = await transaction.get(seatDocRef);
+          if (seatSnap.exists()) {
+            throw new Error("seat-already-taken");
+          }
+          transaction.set(seatDocRef, {
+            name,
+            roomId: room.id,
+            tableId: table.id,
+            tableNumber: table.number,
+            seatNumber,
+            createdAt: nowIso,
+          });
+        }
+      });
 
       // Přidáme také místa na stání jako speciální "sál" Stání, stůl 0
       const standingCountRaw = standingCountInput ? standingCountInput.value : "0";
@@ -403,20 +415,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for (let i = 0; i < standingCount; i++) {
           maxSeatNumber += 1;
-          promises.push(
-            addDoc(reservationsCol, {
-              name,
-              roomId: standingRoomId,
-              tableId: standingTableId,
-              tableNumber: standingTableNumber,
-              seatNumber: maxSeatNumber,
-              createdAt: nowIso,
-            })
-          );
+          await addDoc(reservationsCol, {
+            name,
+            roomId: standingRoomId,
+            tableId: standingTableId,
+            tableNumber: standingTableNumber,
+            seatNumber: maxSeatNumber,
+            createdAt: nowIso,
+          });
         }
       }
-
-      await Promise.all(promises);
 
       formMessage.textContent = "Rezervace proběhla úspěšně. Děkujeme!";
       formMessage.classList.add("success");
@@ -432,8 +440,17 @@ document.addEventListener("DOMContentLoaded", () => {
       clearSelection();
     } catch (e) {
       console.error(e);
-      formMessage.textContent = "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
-      formMessage.classList.add("error");
+      if (e && e.message === "seat-already-taken") {
+        formMessage.textContent =
+          "Některé z vybraných míst bylo právě obsazeno jiným uživatelem. Obnovte prosím výběr.";
+        formMessage.classList.add("error");
+        renderSeats();
+        renderTakenSeatsInfo();
+      } else {
+        formMessage.textContent =
+          "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
+        formMessage.classList.add("error");
+      }
     }
   });
 
