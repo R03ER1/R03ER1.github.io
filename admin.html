@@ -87,7 +87,16 @@
 
       <p id="admin-message" class="form-message"></p>
 
-      <div class="form-actions" style="margin-top:16px;">
+      <div class="form-group" style="margin-top:16px;">
+        <label for="clear-all-confirm">Bezpečné smazání všech rezervací</label>
+        <p class="hint">
+          Pokud opravdu chcete vymazat <strong>všechny</strong> rezervace, napište do pole níže přesně
+          <strong>\"SMAZAT VŠE\"</strong> a pak klikněte na tlačítko.
+        </p>
+        <input type="text" id="clear-all-confirm" placeholder="SMAZAT VŠE">
+      </div>
+
+      <div class="form-actions" style="margin-top:8px;">
         <button id="clear-all" class="btn export">Vymazat všechny rezervace</button>
         <a href="index.html" class="btn secondary">Zpět na rezervace</a>
       </div>

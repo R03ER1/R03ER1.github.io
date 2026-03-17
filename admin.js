@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminTableSelect = document.getElementById("admin-table");
   const adminSeatsContainer = document.getElementById("admin-seats-container");
   const adminFormMessage = document.getElementById("admin-form-message");
+  const clearAllConfirmInput = document.getElementById("clear-all-confirm");
 
   let reservations = []; // {id, data}
   let adminSelectedSeatNumbers = new Set();
@@ -498,7 +499,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   clearAllBtn.addEventListener("click", async () => {
-    if (!confirm("Opravdu chcete vymazat všechny rezervace? Tuto akci nelze vrátit.")) {
+    const confirmText = (clearAllConfirmInput?.value || "").trim();
+    if (confirmText !== "SMAZAT VŠE") {
+      adminMessage.textContent =
+        "Pro vymazání všech rezervací napište do pole výše přesně \"SMAZAT VŠE\".";
+      adminMessage.className = "form-message error";
       return;
     }
     adminMessage.textContent = "Mažu všechny rezervace...";

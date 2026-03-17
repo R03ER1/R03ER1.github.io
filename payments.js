@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     names.forEach((name) => {
       const due = amountsByName.get(name)?.totalDue || 0;
       const paid = paymentsByName.get(name)?.totalPaid || 0;
-      const remaining = Math.max(0, due - paid);
+      const remaining = due - paid;
 
       const tr = document.createElement("tr");
 
@@ -138,13 +138,17 @@ document.addEventListener("DOMContentLoaded", () => {
       tdRemaining.textContent = `${remaining} Kč`;
       tdRemaining.style.padding = "4px 6px";
       tdRemaining.style.textAlign = "right";
+      if (remaining > 0) {
+        tdRemaining.style.color = "#b91c1c"; // dluží
+      } else if (remaining < 0) {
+        tdRemaining.style.color = "#0f766e"; // přeplaceno
+      }
 
       const tdInput = document.createElement("td");
       tdInput.style.padding = "4px 6px";
       tdInput.style.textAlign = "right";
       const input = document.createElement("input");
       input.type = "number";
-      input.min = "0";
       input.step = "10";
       input.value = due.toString();
       input.style.width = "100px";
@@ -161,8 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const rawValue = input.value.trim();
         const amount = Number(rawValue.replace(",", "."));
 
-        if (!rawValue || Number.isNaN(amount) || amount <= 0) {
-          alert("Zadejte prosím kladnou částku k zaplacení.");
+        if (!rawValue || Number.isNaN(amount) || amount === 0) {
+          alert("Zadejte prosím nenulovou částku (může být i záporná pro vrácení peněz).");
           return;
         }
 
