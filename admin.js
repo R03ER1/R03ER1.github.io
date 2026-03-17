@@ -5,6 +5,7 @@ import {
   collection,
   getDocs,
   deleteDoc,
+  addDoc,
   doc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -78,8 +79,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearAllBtn = document.getElementById("clear-all");
   const tableBody = document.getElementById("admin-table-body");
   const adminMessage = document.getElementById("admin-message");
+  const adminReservationForm = document.getElementById("admin-reservation-form");
+  const adminNameInput = document.getElementById("admin-name");
+  const adminRoomSelect = document.getElementById("admin-room");
+  const adminTableSelect = document.getElementById("admin-table");
+  const adminSeatsContainer = document.getElementById("admin-seats-container");
+  const adminFormMessage = document.getElementById("admin-form-message");
 
   let reservations = []; // {id, data}
+  let adminSelectedSeatNumbers = new Set();
 
   loginBtn.addEventListener("click", async () => {
     passwordMessage.textContent = "";
@@ -94,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordSection.classList.add("hidden");
     adminSection.classList.remove("hidden");
     await loadData();
+    initializeAdminForm();
   });
 
   async function loadData() {
@@ -112,6 +121,213 @@ document.addEventListener("DOMContentLoaded", () => {
       adminMessage.textContent = "Nepodařilo se načíst data.";
       adminMessage.classList.add("error");
     }
+  }
+
+  function getFreeSeatCount(roomId, table) {
+    const takenSeatNumbers = new Set(
+      reservations
+        .filter((r) => r.roomId === roomId && r.tableId === table.id)
+        .map((r) => r.seatNumber)
+    );
+    return table.seatCount - takenSeatNumbers.size;
+  }
+
+  function initializeAdminForm() {
+    if (!adminReservationForm) return;
+
+    populateAdminTables();
+    renderAdminSeats();
+
+    adminRoomSelect.addEventListener("change", () => {
+      populateAdminTables();
+      renderAdminSeats();
+      clearAdminSelection();
+    });
+
+    adminTableSelect.addEventListener("change", () => {
+      renderAdminSeats();
+      clearAdminSelection();
+    });
+
+    adminReservationForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!adminFormMessage) return;
+
+      adminFormMessage.textContent = "";
+      adminFormMessage.className = "form-message";
+
+      const name = (adminNameInput?.value || "").trim();
+      if (!name) {
+        adminFormMessage.textContent = "Zadejte prosím jméno a příjmení.";
+        adminFormMessage.classList.add("error");
+        return;
+      }
+
+      if (adminSelectedSeatNumbers.size === 0) {
+        adminFormMessage.textContent =
+          "Vyberte alespoň jedno volné místo, které chcete přidat.";
+        adminFormMessage.classList.add("error");
+        return;
+      }
+
+      const roomId = adminRoomSelect.value;
+      const room = ROOMS[roomId];
+      const tableId = adminTableSelect.value;
+      const table = room?.tables.find((t) => t.id === tableId);
+
+      if (!room || !table) {
+        adminFormMessage.textContent =
+          "Vyberte prosím platný sál a stůl.";
+        adminFormMessage.classList.add("error");
+        return;
+      }
+
+      const takenSeatNumbers = new Set(
+        reservations
+          .filter((r) => r.roomId === room.id && r.tableId === table.id)
+          .map((r) => r.seatNumber)
+      );
+
+      const newlyTaken = [];
+      adminSelectedSeatNumbers.forEach((n) => {
+        if (takenSeatNumbers.has(n)) {
+          newlyTaken.push(n);
+        }
+      });
+
+      if (newlyTaken.length > 0) {
+        adminFormMessage.textContent =
+          "Některá z vybraných míst byla mezitím obsazena: " +
+          newlyTaken.join(", ") +
+          ". Obnovte prosím výběr.";
+        adminFormMessage.classList.add("error");
+        renderAdminSeats();
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+
+      try {
+        const promises = Array.from(adminSelectedSeatNumbers).map(
+          (seatNumber) =>
+            addDoc(reservationsCol, {
+              name,
+              roomId: room.id,
+              tableId: table.id,
+              tableNumber: table.number,
+              seatNumber,
+              createdAt: nowIso,
+            })
+        );
+
+        await Promise.all(promises);
+        await loadData();
+
+        adminFormMessage.textContent =
+          "Rezervace byla úspěšně přidána.";
+        adminFormMessage.classList.add("success");
+        clearAdminSelection();
+        if (adminNameInput) {
+          adminNameInput.value = "";
+        }
+      } catch (e) {
+        console.error(e);
+        adminFormMessage.textContent =
+          "Při ukládání rezervace došlo k chybě. Zkuste to prosím znovu.";
+        adminFormMessage.classList.add("error");
+      }
+    });
+  }
+
+  function populateAdminTables() {
+    const roomId = adminRoomSelect.value;
+    const room = ROOMS[roomId];
+    if (!room || !adminTableSelect) return;
+
+    const previousTableId = adminTableSelect.value || null;
+    adminTableSelect.innerHTML = "";
+
+    room.tables.forEach((table) => {
+      const option = document.createElement("option");
+      option.value = table.id;
+      const free = getFreeSeatCount(room.id, table);
+      option.textContent = `Stůl ${table.number} (${free}/${table.seatCount})`;
+      adminTableSelect.appendChild(option);
+    });
+
+    if (previousTableId) {
+      const exists = room.tables.some((t) => t.id === previousTableId);
+      if (exists) {
+        adminTableSelect.value = previousTableId;
+      }
+    }
+  }
+
+  function renderAdminSeats() {
+    if (!adminSeatsContainer) return;
+
+    const roomId = adminRoomSelect.value;
+    const room = ROOMS[roomId];
+    const tableId = adminTableSelect.value;
+    const table = room?.tables.find((t) => t.id === tableId);
+
+    if (!room || !table) {
+      adminSeatsContainer.innerHTML = "";
+      return;
+    }
+
+    const takenSeatNumbers = new Set(
+      reservations
+        .filter((r) => r.roomId === room.id && r.tableId === table.id)
+        .map((r) => r.seatNumber)
+    );
+
+    adminSelectedSeatNumbers = new Set();
+    adminSeatsContainer.innerHTML = "";
+
+    for (let i = 1; i <= table.seatCount; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "seat";
+      btn.textContent = i.toString();
+
+      if (takenSeatNumbers.has(i)) {
+        btn.classList.add("taken");
+        btn.title = "Místo je již obsazené";
+      } else {
+        btn.classList.add("free");
+        btn.addEventListener("click", () =>
+          toggleAdminSeatSelection(i, btn)
+        );
+      }
+
+      adminSeatsContainer.appendChild(btn);
+    }
+  }
+
+  function toggleAdminSeatSelection(seatNumber, element) {
+    if (adminSelectedSeatNumbers.has(seatNumber)) {
+      adminSelectedSeatNumbers.delete(seatNumber);
+      element.classList.remove("selected");
+      element.classList.add("free");
+    } else {
+      adminSelectedSeatNumbers.add(seatNumber);
+      element.classList.remove("free");
+      element.classList.add("selected");
+    }
+  }
+
+  function clearAdminSelection() {
+    adminSelectedSeatNumbers = new Set();
+    if (!adminSeatsContainer) return;
+    const buttons =
+      adminSeatsContainer.querySelectorAll(".seat.free, .seat.selected");
+    buttons.forEach((btn) => {
+      if (!btn.classList.contains("taken")) {
+        btn.classList.remove("selected");
+        btn.classList.add("free");
+      }
+    });
   }
 
   function renderTable() {

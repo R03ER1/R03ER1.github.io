@@ -28,13 +28,46 @@
     </section>
 
     <section class="form-section hidden" id="admin-section">
-      <h2>Přehled všech míst</h2>
-      <p class="hint">Vidíte všechna místa ve všech sálech. Červené = obsazené, zelené = volné.</p>
+      <h2>Správa rezervací</h2>
+      <p class="hint">Vidíte všechna místa ve všech sálech a můžete přidávat nové rezervace přímo z této stránky.</p>
 
-      <div class="form-actions">
-        <button id="clear-all" class="btn export">Vymazat všechny rezervace</button>
-        <a href="index.html" class="btn secondary">Zpět na rezervace</a>
-      </div>
+      <section style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #e5e7eb;">
+        <h3 style="margin-top:0; margin-bottom:8px; font-size:1rem;">Přidat novou rezervaci</h3>
+        <form id="admin-reservation-form">
+          <div class="form-group">
+            <label for="admin-name">Jméno a příjmení</label>
+            <input type="text" id="admin-name" name="admin-name" placeholder="Např. Jan Novák">
+          </div>
+
+          <div class="form-group">
+            <label for="admin-room">Sál</label>
+            <select id="admin-room" name="admin-room">
+              <option value="room1">Hlavní sál (modrý)</option>
+              <option value="room2">Malý sál (žlutý)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-table">Stůl</label>
+            <select id="admin-table" name="admin-table"></select>
+          </div>
+
+          <div class="form-group">
+            <label>Výběr míst u stolu</label>
+            <p class="hint">Kliknutím vyberte jedno nebo více volných míst. Zelená = volné, červená = obsazené.</p>
+            <div id="admin-seats-container" class="seats-container"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Přidat rezervaci</button>
+          </div>
+
+          <p id="admin-form-message" class="form-message"></p>
+        </form>
+      </section>
+
+      <h3 style="margin-top:0; font-size:1rem;">Přehled všech míst</h3>
+      <p class="hint">Červené = obsazené, zelené = volné. Můžete také mazat jednotlivé rezervace nebo vše najednou.</p>
 
       <div id="admin-table-wrapper" style="margin-top:16px; max-height: 480px; overflow:auto;">
         <table id="admin-table" style="width:100%; border-collapse: collapse; font-size:0.85rem;">
@@ -53,6 +86,11 @@
       </div>
 
       <p id="admin-message" class="form-message"></p>
+
+      <div class="form-actions" style="margin-top:16px;">
+        <button id="clear-all" class="btn export">Vymazat všechny rezervace</button>
+        <a href="index.html" class="btn secondary">Zpět na rezervace</a>
+      </div>
     </section>
   </main>
 
