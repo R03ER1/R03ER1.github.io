@@ -33,6 +33,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const reservationsCol = collection(db, "reservations");
 const paymentsCol = collection(db, "payments");
+const votesCol = collection(db, "votes");
 
 // ---------- Konfigurace stolů ----------
 // Počty míst u konkrétních stolů – pokud nesedí podle plánku, změň hodnoty tady.
@@ -116,6 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const priceRoom2Count = document.getElementById("price-room2-count");
   const priceRoom2Total = document.getElementById("price-room2-total");
   const priceTotal = document.getElementById("price-total");
+  const voteYesBtn = document.getElementById("vote-yes");
+  const voteNoBtn = document.getElementById("vote-no");
+  const voteMessage = document.getElementById("vote-message");
+  const voteStats = document.getElementById("vote-stats");
 
   let selectedSeatNumbers = new Set();
 
@@ -534,6 +539,81 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPeopleTable();
   updatePriceSummary();
 });
+
+  // Realtime přehled hlasování
+  onSnapshot(votesCol, (snapshot) => {
+    const votes = snapshot.docs.map((doc) => doc.data());
+    const yes = votes.filter((v) => v.value === "yes").length;
+    const no = votes.filter((v) => v.value === "no").length;
+    const total = yes + no;
+
+    if (!voteStats) return;
+
+    if (total === 0) {
+      voteStats.textContent = "Zatím nikdo nehlasoval.";
+      return;
+    }
+
+    const yesPct = ((yes / total) * 100).toFixed(1);
+    const noPct = ((no / total) * 100).toFixed(1);
+    voteStats.textContent =
+      `Hlasy celkem: ${total} – NEZRUŠIT: ${yes} (${yesPct} %), ZRUŠIT: ${no} (${noPct} %).`;
+  });
+
+  const VOTE_STORAGE_KEY = "maturakVote2026";
+
+  function getStoredVote() {
+    try {
+      return localStorage.getItem(VOTE_STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  function storeVote(value) {
+    try {
+      localStorage.setItem(VOTE_STORAGE_KEY, value);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleVote(value) {
+    if (!voteMessage) return;
+
+    const existing = getStoredVote();
+    if (existing) {
+      voteMessage.className = "form-message";
+      voteMessage.textContent =
+        "Z tohoto prohlížeče už bylo hlasováno. Děkujeme.";
+      return;
+    }
+
+    voteMessage.className = "form-message";
+    voteMessage.textContent = "Ukládám váš hlas...";
+
+    try {
+      await addDoc(votesCol, {
+        value,
+        createdAt: new Date().toISOString(),
+      });
+      storeVote(value);
+      voteMessage.className = "form-message success";
+      voteMessage.textContent = "Hlas byl uložen. Děkujeme!";
+    } catch (e) {
+      console.error(e);
+      voteMessage.className = "form-message error";
+      voteMessage.textContent = "Nepodařilo se uložit hlas. Zkuste to prosím znovu.";
+    }
+  }
+
+  if (voteYesBtn) {
+    voteYesBtn.addEventListener("click", () => handleVote("yes"));
+  }
+
+  if (voteNoBtn) {
+    voteNoBtn.addEventListener("click", () => handleVote("no"));
+  }
 
   // Odemčení rezervací:
   // - do 16. 3. 2026 22:00 CET (21:00 UTC) povoleno pro organizátory
