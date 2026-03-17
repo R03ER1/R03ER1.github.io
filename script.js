@@ -850,7 +850,7 @@ async function renderPeopleTable() {
   sortedNames.forEach((name) => {
     const stats = statsByName.get(name);
     const paid = paymentsByName.get(name) || 0;
-    const remaining = Math.max(0, stats.totalDue - paid);
+    const remaining = stats.totalDue - paid;
     const tr = document.createElement("tr");
     tr.style.cursor = "pointer";
 
@@ -873,7 +873,13 @@ async function renderPeopleTable() {
     const tdRemaining = document.createElement("td");
     tdRemaining.textContent = `${remaining} Kč`;
     tdRemaining.style.padding = "4px 6px";
-    tdRemaining.style.color = remaining === 0 ? "#16a34a" : "#b91c1c";
+    if (remaining > 0) {
+      tdRemaining.style.color = "#b91c1c"; // dluží
+    } else if (remaining < 0) {
+      tdRemaining.style.color = "#0f766e"; // přeplaceno
+    } else {
+      tdRemaining.style.color = "#16a34a"; // vyrovnáno
+    }
 
     tr.appendChild(tdName);
     tr.appendChild(tdTotal);
