@@ -367,14 +367,24 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zapíšeme každé vybrané místo u stolu pomocí transakce,
       // aby se předešlo dvojímu obsazení stejného místa.
       await runTransaction(db, async (transaction) => {
-        for (const seatNumber of selectedSeatArray) {
+        // 1) Nejprve načteme všechny dokumenty (všechny čtení před zápisy)
+        const seatRefs = selectedSeatArray.map((seatNumber) => {
           const seatDocId = `${room.id}_${table.id}_${seatNumber}`;
-          const seatDocRef = doc(reservationsCol, seatDocId);
-          const seatSnap = await transaction.get(seatDocRef);
-          if (seatSnap.exists()) {
-            throw new Error("seat-already-taken");
-          }
-          transaction.set(seatDocRef, {
+          return { seatNumber, ref: doc(reservationsCol, seatDocId) };
+        });
+
+        const snapshots = await Promise.all(
+          seatRefs.map(({ ref }) => transaction.get(ref))
+        );
+
+        const alreadyTaken = snapshots.some((snap) => snap.exists());
+        if (alreadyTaken) {
+          throw new Error("seat-already-taken");
+        }
+
+        // 2) Až potom zapíšeme všechna místa
+        seatRefs.forEach(({ seatNumber, ref }) => {
+          transaction.set(ref, {
             name,
             roomId: room.id,
             tableId: table.id,
@@ -382,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
             seatNumber,
             createdAt: nowIso,
           });
-        }
+        });
       });
 
       // Přidáme také místa na stání jako speciální "sál" Stání, stůl 0
