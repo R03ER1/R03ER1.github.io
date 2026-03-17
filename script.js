@@ -556,8 +556,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const yesPct = ((yes / total) * 100).toFixed(1);
     const noPct = ((no / total) * 100).toFixed(1);
-    voteStats.textContent =
-      `Hlasy celkem: ${total} – NEZRUŠIT: ${yes} (${yesPct} %), ZRUŠIT: ${no} (${noPct} %).`;
+    voteStats.innerHTML =
+      `Hlasy celkem: ${total}<br>` +
+      `NEZRUŠIT: ${yes} (<strong>${yesPct} %</strong>) &nbsp; | &nbsp; ` +
+      `ZRUŠIT: ${no} (<strong>${noPct} %</strong>)`;
   });
 
   const VOTE_STORAGE_KEY = "maturakVote2026";
