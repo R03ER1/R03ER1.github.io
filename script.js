@@ -532,15 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
     URL.revokeObjectURL(url);
   });
 
-  // start
-  updateRoomOptions();
-  populateTables();
-  renderPublicTable();
-  renderPeopleTable();
-  updatePriceSummary();
-});
-
-  // Realtime přehled hlasování
+  // ----- Hlasování o zrušení maturáku -----
   onSnapshot(votesCol, (snapshot) => {
     const votes = snapshot.docs.map((doc) => doc.data());
     const yes = votes.filter((v) => v.value === "yes").length;
@@ -605,7 +597,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error(e);
       voteMessage.className = "form-message error";
-      voteMessage.textContent = "Nepodařilo se uložit hlas. Zkuste to prosím znovu.";
+      voteMessage.textContent =
+        "Nepodařilo se uložit hlas. Zkuste to prosím znovu.";
     }
   }
 
@@ -617,7 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
     voteNoBtn.addEventListener("click", () => handleVote("no"));
   }
 
-  // Odemčení rezervací:
+  // ----- Odemčení rezervací dle času -----
   // - do 16. 3. 2026 22:00 CET (21:00 UTC) povoleno pro organizátory
   // - od 16. 3. 2026 22:00 CET do 18. 3. 2026 17:00 CET zamknuto s odpočtem
   // - po 18. 3. 2026 17:00 CET trvale odemčeno
@@ -674,6 +667,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateReservationAvailability();
   setInterval(updateReservationAvailability, 1000);
+
+  // start
+  updateRoomOptions();
+  populateTables();
+  renderPublicTable();
+  renderPeopleTable();
+  updatePriceSummary();
+});
 
 function updatePriceSummary() {
   const roomSelect = document.getElementById("room");
