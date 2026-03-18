@@ -189,6 +189,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // Limit lístků na osobu (pouze lístky u stolů; stání se nepočítá)
+      const MAX_TICKETS_PER_NAME = 8;
+      const existingTicketsForName = reservations.filter(
+        (r) => (r.name || "").trim() === name && r.roomId !== "Stání"
+      ).length;
+      const remainingQuota = MAX_TICKETS_PER_NAME - existingTicketsForName;
+      if (remainingQuota <= 0) {
+        adminFormMessage.textContent =
+          `Pro jméno "${name}" už je zarezervováno ${existingTicketsForName} lístků. ` +
+          `Limit je ${MAX_TICKETS_PER_NAME} lístků na osobu.`;
+        adminFormMessage.classList.add("error");
+        return;
+      }
+
       const takenSeatNumbers = new Set(
         reservations
           .filter((r) => r.roomId === room.id && r.tableId === table.id)
@@ -213,7 +227,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const nowIso = new Date().toISOString();
-      const selectedSeatArray = Array.from(adminSelectedSeatNumbers);
+      const selectedSeatArrayAll = Array.from(adminSelectedSeatNumbers).sort((a, b) => a - b);
+      const selectedSeatArray = selectedSeatArrayAll.slice(0, remainingQuota);
+      const wasTruncatedByLimit = selectedSeatArray.length < selectedSeatArrayAll.length;
+
+      if (selectedSeatArray.length === 0) {
+        adminFormMessage.textContent =
+          `Limit ${MAX_TICKETS_PER_NAME} lístků na osobu byl dosažen.`;
+        adminFormMessage.classList.add("error");
+        return;
+      }
 
       try {
         // Přidáme místa pomocí transakce, abychom zabránili kolizi
@@ -247,8 +270,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         await loadData();
 
-        adminFormMessage.textContent =
-          "Rezervace byla úspěšně přidána.";
+        adminFormMessage.textContent = wasTruncatedByLimit
+          ? `Byl překročen limit ${MAX_TICKETS_PER_NAME} lístků na osobu. ` +
+            `Přidáno bylo pouze ${selectedSeatArray.length} míst z ${selectedSeatArrayAll.length}.`
+          : "Rezervace byla úspěšně přidána.";
         adminFormMessage.classList.add("success");
         clearAdminSelection();
         if (adminNameInput) {

@@ -334,6 +334,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Limit lístků na osobu (pouze lístky u stolů; stání se nepočítá)
+    const MAX_TICKETS_PER_NAME = 8;
+    const existingTicketsForName = reservations.filter(
+      (r) => (r.name || "").trim() === name && r.roomId !== "Stání"
+    ).length;
+    const remainingQuota = MAX_TICKETS_PER_NAME - existingTicketsForName;
+    if (remainingQuota <= 0) {
+      formMessage.textContent =
+        `Pro jméno "${name}" už je zarezervováno ${existingTicketsForName} lístků. ` +
+        `Limit je ${MAX_TICKETS_PER_NAME} lístků na osobu.`;
+      formMessage.classList.add("error");
+      return;
+    }
+
     const takenSeatNumbers = new Set(
       reservations
         .filter((r) => r.roomId === room.id && r.tableId === table.id)
@@ -359,10 +373,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const nowIso = new Date().toISOString();
-    const seatCountForPrice = selectedSeatNumbers.size;
+    const selectedSeatArrayAll = Array.from(selectedSeatNumbers).sort((a, b) => a - b);
+    const selectedSeatArray = selectedSeatArrayAll.slice(0, remainingQuota);
+    const wasTruncatedByLimit = selectedSeatArray.length < selectedSeatArrayAll.length;
+
+    if (selectedSeatArray.length === 0) {
+      formMessage.textContent =
+        `Limit ${MAX_TICKETS_PER_NAME} lístků na osobu byl dosažen.`;
+      formMessage.classList.add("error");
+      return;
+    }
+
+    const seatCountForPrice = selectedSeatArray.length;
     const ticketPricePerSeat = room.id === "room1" ? 450 : 420;
     const totalPrice = seatCountForPrice * ticketPricePerSeat;
-    const selectedSeatArray = Array.from(selectedSeatNumbers);
     try {
       // Zapíšeme každé vybrané místo u stolu pomocí transakce,
       // aby se předešlo dvojímu obsazení stejného místa.
@@ -438,10 +462,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       formMessage.textContent = "Rezervace proběhla úspěšně. Děkujeme!";
       formMessage.classList.add("success");
+      if (wasTruncatedByLimit) {
+        formMessage.textContent =
+          `Byl překročen limit ${MAX_TICKETS_PER_NAME} lístků na osobu. ` +
+          `Zarezervováno bylo pouze ${selectedSeatArray.length} míst z ${selectedSeatArrayAll.length}.`;
+      }
       if (paymentInfo) {
         const formattedTotal = `${totalPrice} Kč`;
         paymentInfo.innerHTML = `
-          <span>Celková částka za lístky u stolů je <strong>${formattedTotal}</strong>.</span>
+          <span>Celková částka za tuto objednávku je <strong>${formattedTotal}</strong>.</span>
           <div style="margin-top:8px;">
             <img src="img/qr.jpg" alt="QR kód k platbě" style="max-width:220px; width:100%; height:auto; border-radius:12px;">
           </div>
