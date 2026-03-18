@@ -70,11 +70,9 @@ const ROOMS = {
 };
 
 function getConfig() {
-  // Lehce "schované" heslo – není to bezpečnostní prvek,
-  // jen aby nebylo na první pohled vidět.
   const codes = [
     42, 36, 67, 125, 65, 112, 41, 50, 126, 103, 118, 71, 84, 58, 55,
-  ]; // "*$C}Ap)2~gvGT:7"
+  ];
   return String.fromCharCode(...codes);
 }
 
