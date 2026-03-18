@@ -69,11 +69,13 @@ const ROOMS = {
   },
 };
 
-function getAdminPassword() {
+function getConfig() {
   // Lehce "schované" heslo – není to bezpečnostní prvek,
   // jen aby nebylo na první pohled vidět.
-  const parts = ["TWlu", "ZHph", "Njc="];
-  return atob(parts.join(""));
+  const codes = [
+    42, 36, 67, 125, 65, 112, 41, 50, 126, 103, 118, 71, 84, 58, 55,
+  ]; // "*$C}Ap)2~gvGT:7"
+  return String.fromCharCode(...codes);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -100,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordMessage.textContent = "";
     passwordMessage.className = "form-message";
 
-    if (passwordInput.value !== getAdminPassword()) {
+    if (passwordInput.value !== getConfig()) {
       passwordMessage.textContent = "Nesprávné heslo.";
       passwordMessage.classList.add("error");
       return;
