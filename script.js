@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
   const publicTableContainer = document.getElementById("public-table-container");
   const publicTableBody = document.getElementById("public-table-body");
+  const togglePeopleTableBtn = document.getElementById("toggle-people-table");
   const peopleTableContainer = document.getElementById("people-table-container");
   const peopleTableBody = document.getElementById("people-table-body");
   const priceRoom1Count = document.getElementById("price-room1-count");
@@ -134,8 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
     populateTables(true);
     renderSeats();
     renderTakenSeatsInfo();
-    renderPublicTable();
-    renderPeopleTable();
+    if (publicTableContainer && !publicTableContainer.classList.contains("hidden")) {
+      renderPublicTable();
+    }
+    if (peopleTableContainer && !peopleTableContainer.classList.contains("hidden")) {
+      renderPeopleTable();
+    }
   });
 
   function getRoomSeatStats(roomId) {
@@ -533,6 +538,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (togglePeopleTableBtn && peopleTableContainer) {
+    togglePeopleTableBtn.addEventListener("click", () => {
+      const isHidden = peopleTableContainer.classList.contains("hidden");
+      peopleTableContainer.classList.toggle("hidden", !isHidden);
+      togglePeopleTableBtn.textContent = isHidden
+        ? "Skrýt přehled podle lidí"
+        : "Zobrazit přehled podle lidí";
+      if (isHidden) {
+        renderPeopleTable();
+      }
+    });
+  }
+
   // Export CSV používá globální "reservations" z Firestore
   downloadCsvBtn.addEventListener("click", () => {
     if (reservations.length === 0) {
@@ -727,8 +745,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // start
   updateRoomOptions();
   populateTables();
-  renderPublicTable();
-  renderPeopleTable();
   updatePriceSummary();
 });
 
