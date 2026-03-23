@@ -110,6 +110,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const takenSeatsDiv = document.getElementById("taken-seats");
   const downloadCsvBtn = document.getElementById("download-csv");
   const downloadGuestsPdfBtn = document.getElementById("download-guests-pdf");
+  const guestPrintOverlay = document.getElementById("guest-print-overlay");
+  const guestPrintSheet = document.getElementById("guest-print-sheet");
+  const guestPrintClose = document.getElementById("guest-print-close");
+  const guestPrintTrigger = document.getElementById("guest-print-trigger");
+
+  function closeGuestPrintOverlay() {
+    if (guestPrintOverlay) {
+      guestPrintOverlay.classList.add("hidden");
+      guestPrintOverlay.setAttribute("aria-hidden", "true");
+    }
+    if (guestPrintSheet) guestPrintSheet.innerHTML = "";
+    document.body.classList.remove("guest-print-open");
+  }
+
+  guestPrintClose?.addEventListener("click", closeGuestPrintOverlay);
+  guestPrintTrigger?.addEventListener("click", () => {
+    window.print();
+  });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && guestPrintOverlay && !guestPrintOverlay.classList.contains("hidden")) {
+      closeGuestPrintOverlay();
+    }
+  });
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
   const publicTableContainer = document.getElementById("public-table-container");
   const publicTableBody = document.getElementById("public-table-body");
@@ -668,54 +691,36 @@ document.addEventListener("DOMContentLoaded", () => {
             return (
               "<tr>" +
               `<td>${escapeHtml(name)}</td>` +
-              `<td class="num">${escapeHtml(`${remaining} Kč`)}</td>` +
-              `<td class="seats"><ul>${lines || "<li>—</li>"}</ul></td>` +
+              `<td class="guest-print-num">${escapeHtml(`${remaining} Kč`)}</td>` +
+              `<td><ul>${lines || "<li>—</li>"}</ul></td>` +
               "</tr>"
             );
           })
           .join("");
 
-        const html =
-          "<!DOCTYPE html><html lang=\"cs\"><head><meta charset=\"utf-8\">" +
-          "<title>Seznam hostů – maturák</title>" +
-          "<style>" +
-          "@page { size: A4; margin: 14mm; }" +
-          "body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 10pt; color: #111; }" +
-          "h1 { font-size: 14pt; margin: 0 0 4px; }" +
-          ".meta { font-size: 9pt; color: #444; margin-bottom: 12px; }" +
-          "table { width: 100%; border-collapse: collapse; table-layout: fixed; }" +
-          "th, td { border: 1px solid #333; padding: 5px 6px; vertical-align: top; word-wrap: break-word; }" +
-          "th { background: #f3f4f6; font-weight: 600; text-align: left; }" +
-          "td.num { text-align: right; white-space: nowrap; width: 22%; }" +
-          "td.seats ul { margin: 0; padding-left: 16px; }" +
-          "thead { display: table-header-group; }" +
-          "tr { page-break-inside: avoid; }" +
-          "</style></head><body>" +
+        if (!guestPrintSheet || !guestPrintOverlay) {
+          alert("Chybí prvky pro zobrazení tisku.");
+          return;
+        }
+
+        guestPrintSheet.innerHTML =
           "<h1>Seznam hostů</h1>" +
-          `<p class="meta">Maturitní ples – vygenerováno ${escapeHtml(today)}</p>` +
-          "<table><thead><tr>" +
+          `<p class="guest-print-meta">Maturitní ples – vygenerováno ${escapeHtml(today)}</p>` +
+          "<table class=\"guest-print-table\"><thead><tr>" +
           "<th style=\"width:26%;\">Jméno</th>" +
           "<th>Zbývá zaplatit</th>" +
           "<th>Rezervovaná místa</th>" +
           "</tr></thead><tbody>" +
           rowsHtml +
-          "</tbody></table></body></html>";
+          "</tbody></table>";
 
-        const w = window.open("", "_blank");
-        if (!w) {
-          alert("Povolte v prohlížeči otevírání vyskakovacích oken pro tento web.");
-          return;
-        }
-        w.document.open();
-        w.document.write(html);
-        w.document.close();
-        setTimeout(() => {
-          w.focus();
-          w.print();
-        }, 200);
+        guestPrintOverlay.classList.remove("hidden");
+        guestPrintOverlay.setAttribute("aria-hidden", "false");
+        document.body.classList.add("guest-print-open");
+        guestPrintSheet.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (e) {
         console.error(e);
-        alert("Nepodařilo se načíst data nebo otevřít tisk.");
+        alert("Nepodařilo se načíst data.");
       }
     });
   }

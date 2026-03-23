@@ -279,6 +279,166 @@ select:focus {
   display: none;
 }
 
+/* Seznam hostů – náhled + tisk ve stejném okně (iOS bez popup) */
+body.guest-print-open {
+  overflow: hidden;
+}
+
+.guest-print-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.55);
+  overflow: auto;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.guest-print-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.guest-print-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.guest-print-hint {
+  margin: 0;
+  flex: 1 1 220px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.guest-print-toolbar-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guest-print-sheet {
+  padding: 16px 18px 24px;
+  color: #111;
+}
+
+.guest-print-sheet h1 {
+  font-size: 1.15rem;
+  margin: 0 0 4px;
+}
+
+.guest-print-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0 0 14px;
+}
+
+.guest-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.82rem;
+}
+
+.guest-print-table th,
+.guest-print-table td {
+  border: 1px solid #334155;
+  padding: 6px 7px;
+  vertical-align: top;
+  word-wrap: break-word;
+}
+
+.guest-print-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+
+.guest-print-table td.guest-print-num {
+  text-align: right;
+  white-space: nowrap;
+  width: 22%;
+}
+
+.guest-print-table ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #guest-print-overlay,
+  #guest-print-overlay * {
+    visibility: visible;
+  }
+
+  #guest-print-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  .guest-print-inner {
+    box-shadow: none;
+    border-radius: 0;
+    max-width: none;
+  }
+
+  .guest-print-toolbar {
+    display: none !important;
+  }
+
+  .guest-print-sheet {
+    padding: 0;
+  }
+
+  .guest-print-table {
+    font-size: 10pt;
+  }
+
+  .guest-print-sheet h1 {
+    font-size: 14pt;
+  }
+
+  .guest-print-meta {
+    font-size: 9pt;
+    color: #333;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  .guest-print-table tr {
+    page-break-inside: avoid;
+  }
+}
+
 .taken-seats-section {
   margin-top: 16px;
 }

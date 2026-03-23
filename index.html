@@ -149,7 +149,7 @@
     <button id="download-csv" class="btn export">Stáhnout rezervace jako CSV</button>
     <div style="margin-top:12px;">
       <button type="button" id="download-guests-pdf" class="btn secondary">Seznam hostů (PDF / tisk A4)</button>
-      <p class="hint" style="margin-top:6px;">Otevře okno s přehledem vhodným pro tisk na A4. V dialogu tisku zvolte „Uložit jako PDF“.</p>
+      <p class="hint" style="margin-top:6px;">Zobrazí přehled na této stránce (bez nového okna). Potom klepněte na <strong>Tisk / uložit jako PDF</strong> – v iPhonu v dialogu zvolte „Uložit do Souborů“.</p>
     </div>
     <div style="margin-top:16px;">
       <button id="toggle-public-table" class="btn secondary">Zobrazit přehled všech míst</button>
@@ -201,6 +201,22 @@
       <img src="img/qr.jpg" alt="QR kód k platbě" style="max-width:220px; width:100%; height:auto; border-radius:12px;">
     </div>
   </footer>
+
+  <!-- Přehled pro tisk A4 – stejné okno (bez vyskakovacích oken, vhodné pro iPhone) -->
+  <div id="guest-print-overlay" class="guest-print-overlay hidden" aria-hidden="true">
+    <div class="guest-print-inner">
+      <div class="guest-print-toolbar">
+        <p class="guest-print-hint">
+          Po načtení seznamu klepněte na <strong>Tisk / uložit jako PDF</strong> (na iPhonu pak „Uložit do Souborů“).
+        </p>
+        <div class="guest-print-toolbar-btns">
+          <button type="button" id="guest-print-trigger" class="btn primary">Tisk / uložit jako PDF</button>
+          <button type="button" id="guest-print-close" class="btn secondary">Zavřít</button>
+        </div>
+      </div>
+      <div id="guest-print-sheet" class="guest-print-sheet"></div>
+    </div>
+  </div>
 
   <script type="module" src="script.js"></script>
 </body>
