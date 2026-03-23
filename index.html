@@ -151,6 +151,18 @@
       <button type="button" id="download-guests-pdf" class="btn secondary">Seznam hostů (PDF / tisk A4)</button>
       <p class="hint" style="margin-top:6px;">Zobrazí přehled na této stránce (bez nového okna). Potom klepněte na <strong>Tisk / uložit jako PDF</strong> – v iPhonu v dialogu zvolte „Uložit do Souborů“.</p>
     </div>
+    <div style="margin-top:12px;">
+      <label for="table-slips-per-page" class="hint" style="display:block; margin-bottom:6px;">Lístečky ke stolům – kolik na jednu stránku A4:</label>
+      <select id="table-slips-per-page" style="margin-bottom:8px; padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem;">
+        <option value="4" selected>4 (čtvrtiny – 2×2)</option>
+        <option value="3">3 (třetiny pod sebou)</option>
+        <option value="2">2 (poloviny pod sebou)</option>
+      </select>
+      <div>
+        <button type="button" id="download-table-slips-print" class="btn secondary">Lístečky ke stolům (tisk A4)</button>
+      </div>
+      <p class="hint" style="margin-top:6px;">Každý lísteček: <strong>STŮL číslo</strong>, sál a seznam míst s objednateli. Tečkované okraje slouží ke střihu. Tisk jako u seznamu hostů.</p>
+    </div>
     <div style="margin-top:16px;">
       <button id="toggle-public-table" class="btn secondary">Zobrazit přehled všech míst</button>
     </div>
@@ -215,6 +227,21 @@
         </div>
       </div>
       <div id="guest-print-sheet" class="guest-print-sheet"></div>
+    </div>
+  </div>
+
+  <div id="table-slips-overlay" class="guest-print-overlay hidden" aria-hidden="true">
+    <div class="guest-print-inner">
+      <div class="guest-print-toolbar">
+        <p class="guest-print-hint">
+          Klepněte na <strong>Tisk / uložit jako PDF</strong>. Na papíře stříhejte podle tečkovaných čar mezi lístečky.
+        </p>
+        <div class="guest-print-toolbar-btns">
+          <button type="button" id="table-slips-print-trigger" class="btn primary">Tisk / uložit jako PDF</button>
+          <button type="button" id="table-slips-close" class="btn secondary">Zavřít</button>
+        </div>
+      </div>
+      <div id="table-slips-sheet" class="guest-print-sheet table-slips-sheet"></div>
     </div>
   </div>
 

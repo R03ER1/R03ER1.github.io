@@ -114,6 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const guestPrintSheet = document.getElementById("guest-print-sheet");
   const guestPrintClose = document.getElementById("guest-print-close");
   const guestPrintTrigger = document.getElementById("guest-print-trigger");
+  const tableSlipsOverlay = document.getElementById("table-slips-overlay");
+  const tableSlipsSheet = document.getElementById("table-slips-sheet");
+  const tableSlipsClose = document.getElementById("table-slips-close");
+  const tableSlipsTrigger = document.getElementById("table-slips-print-trigger");
+  const downloadTableSlipsBtn = document.getElementById("download-table-slips-print");
+  const tableSlipsPerPage = document.getElementById("table-slips-per-page");
 
   function closeGuestPrintOverlay() {
     if (guestPrintOverlay) {
@@ -124,13 +130,30 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("guest-print-open");
   }
 
+  function closeTableSlipsOverlay() {
+    if (tableSlipsOverlay) {
+      tableSlipsOverlay.classList.add("hidden");
+      tableSlipsOverlay.setAttribute("aria-hidden", "true");
+    }
+    if (tableSlipsSheet) tableSlipsSheet.innerHTML = "";
+    document.body.classList.remove("guest-print-open");
+  }
+
   guestPrintClose?.addEventListener("click", closeGuestPrintOverlay);
   guestPrintTrigger?.addEventListener("click", () => {
     window.print();
   });
+  tableSlipsClose?.addEventListener("click", closeTableSlipsOverlay);
+  tableSlipsTrigger?.addEventListener("click", () => {
+    window.print();
+  });
+
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && guestPrintOverlay && !guestPrintOverlay.classList.contains("hidden")) {
+    if (ev.key !== "Escape") return;
+    if (guestPrintOverlay && !guestPrintOverlay.classList.contains("hidden")) {
       closeGuestPrintOverlay();
+    } else if (tableSlipsOverlay && !tableSlipsOverlay.classList.contains("hidden")) {
+      closeTableSlipsOverlay();
     }
   });
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
@@ -714,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
           rowsHtml +
           "</tbody></table>";
 
+        closeTableSlipsOverlay();
         guestPrintOverlay.classList.remove("hidden");
         guestPrintOverlay.setAttribute("aria-hidden", "false");
         document.body.classList.add("guest-print-open");
@@ -721,6 +745,34 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) {
         console.error(e);
         alert("Nepodařilo se načíst data.");
+      }
+    });
+  }
+
+  // Lístečky ke stolům (A4: 2 / 3 / 4 na stránku, střih podle čar)
+  if (downloadTableSlipsBtn) {
+    downloadTableSlipsBtn.addEventListener("click", async () => {
+      try {
+        const perPage = tableSlipsPerPage ? tableSlipsPerPage.value : "4";
+        const resSnap = await getDocs(reservationsCol);
+        const allRes = resSnap.docs.map((d) => d.data());
+
+        if (!tableSlipsSheet || !tableSlipsOverlay) {
+          alert("Chybí prvky pro zobrazení tisku.");
+          return;
+        }
+
+        tableSlipsSheet.innerHTML = buildTableSlipsSheetHtml(allRes, perPage);
+        closeGuestPrintOverlay();
+        tableSlipsOverlay.classList.remove("hidden");
+        tableSlipsOverlay.setAttribute("aria-hidden", "false");
+        document.body.classList.add("guest-print-open");
+        tableSlipsOverlay.scrollTop = 0;
+        const slipsInner = tableSlipsOverlay.querySelector(".guest-print-inner");
+        if (slipsInner) slipsInner.scrollTop = 0;
+      } catch (e) {
+        console.error(e);
+        alert("Nepodařilo se načíst rezervace.");
       }
     });
   }
@@ -937,6 +989,70 @@ function sortReservationsForPerson(a, b) {
     return (a.tableNumber || 0) - (b.tableNumber || 0);
   }
   return (a.roomId || "").localeCompare(b.roomId || "");
+}
+
+function roomShortSal(roomKey) {
+  return roomKey === "room1" ? "Hlavní sál" : "Malý sál";
+}
+
+/** Lístečky ke stolům: HTML do #table-slips-sheet; perPage 2 | 3 | 4 */
+function buildTableSlipsSheetHtml(allRes, perPage) {
+  const per = [2, 3, 4].includes(Number(perPage)) ? Number(perPage) : 4;
+  const slips = [];
+
+  for (const roomKey of ["room1", "room2"]) {
+    const room = ROOMS[roomKey];
+    const shortSal = roomShortSal(roomKey);
+    for (const table of room.tables) {
+      const taken = allRes.filter(
+        (r) => r.roomId === room.id && r.tableId === table.id
+      );
+      const bySeat = new Map();
+      taken.forEach((r) => {
+        bySeat.set(r.seatNumber, (r.name || "").trim() || "—");
+      });
+      const items = [];
+      for (let s = 1; s <= table.seatCount; s++) {
+        const name = bySeat.get(s);
+        items.push(
+          `<li><span class="table-slip-seat">${s}.</span> ${escapeHtml(name ? name : "Volné")}</li>`
+        );
+      }
+      slips.push(
+        `<div class="table-slip">` +
+          `<div class="table-slip-head">` +
+          `<div class="table-slip-title">STŮL ${table.number}</div>` +
+          `<div class="table-slip-sub">${escapeHtml(shortSal)}</div>` +
+          `</div>` +
+          `<ul class="table-slip-list">${items.join("")}</ul>` +
+        `</div>`
+      );
+    }
+  }
+
+  const gridClass =
+    per === 4
+      ? "table-slips-page--4"
+      : per === 3
+        ? "table-slips-page--3"
+        : "table-slips-page--2";
+  const pagesHtml = [];
+  for (let i = 0; i < slips.length; i += per) {
+    const slice = slips.slice(i, i + per);
+    const padded = slice.slice();
+    while (padded.length < per) {
+      padded.push(
+        '<div class="table-slip table-slip--empty" aria-hidden="true"></div>'
+      );
+    }
+    pagesHtml.push(
+      `<div class="table-slips-page ${gridClass}">${padded.join("")}</div>`
+    );
+  }
+
+  const hint = `<p class="table-slips-screen-hint">Náhled: ${slips.length} stolů, na stránku ${per} lístečků. Po tisku stříhejte podle čar.</p>`;
+
+  return hint + pagesHtml.join("");
 }
 
 function renderPublicTable() {

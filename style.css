@@ -386,11 +386,14 @@ body.guest-print-open {
   }
 
   #guest-print-overlay,
-  #guest-print-overlay * {
+  #guest-print-overlay *,
+  #table-slips-overlay,
+  #table-slips-overlay * {
     visibility: visible;
   }
 
-  #guest-print-overlay {
+  #guest-print-overlay,
+  #table-slips-overlay {
     position: absolute;
     left: 0;
     top: 0;
@@ -436,6 +439,197 @@ body.guest-print-open {
 
   .guest-print-table tr {
     page-break-inside: avoid;
+  }
+
+  .table-slips-screen-hint {
+    display: none !important;
+  }
+}
+
+/* ----- Lístečky ke stolům (náhled + tisk) ----- */
+.table-slips-sheet {
+  padding-bottom: 32px;
+}
+
+.table-slips-screen-hint {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.table-slips-page {
+  display: grid;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 2px dashed #94a3b8;
+  background: #fff;
+  box-sizing: border-box;
+  min-height: 520px;
+}
+
+.table-slips-page--4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.table-slips-page--3 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.table-slips-page--2 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.table-slip {
+  border: 1px dashed #1e293b;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.table-slip--empty {
+  background: #f8fafc;
+}
+
+.table-slip-head {
+  text-align: center;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.table-slip-title {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  color: #0f172a;
+}
+
+.table-slip-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.table-slip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.table-slip-list li {
+  padding: 2px 0;
+  border-bottom: 1px dotted #e2e8f0;
+}
+
+.table-slip-list li:last-child {
+  border-bottom: none;
+}
+
+.table-slip-seat {
+  display: inline-block;
+  min-width: 1.25em;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* Velikosti podle hustoty na stránce */
+.table-slips-page--4 .table-slip-title {
+  font-size: clamp(1rem, 3.2vw, 1.35rem);
+}
+
+.table-slips-page--4 .table-slip-list {
+  font-size: 0.62rem;
+  line-height: 1.3;
+}
+
+.table-slips-page--3 .table-slip-title {
+  font-size: clamp(1.15rem, 3.5vw, 1.6rem);
+}
+
+.table-slips-page--3 .table-slip-list {
+  font-size: 0.68rem;
+}
+
+.table-slips-page--2 .table-slip-title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.table-slips-page--2 .table-slip-list {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@media print {
+  .table-slips-page {
+    margin-bottom: 0;
+    page-break-after: always;
+    break-after: page;
+    min-height: 0;
+    /* A4 297 mm − okraje @page 14 mm nahoře i dole */
+    height: 269mm;
+    max-height: 269mm;
+    border: 1px dashed #64748b;
+  }
+
+  .table-slips-sheet > .table-slips-page:last-of-type {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .table-slip {
+    padding: 3mm 4mm;
+  }
+
+  .table-slips-page--4 .table-slip-title {
+    font-size: 16pt;
+  }
+
+  .table-slips-page--4 .table-slip-sub {
+    font-size: 8pt;
+  }
+
+  .table-slips-page--4 .table-slip-list {
+    font-size: 7pt;
+  }
+
+  .table-slips-page--3 .table-slip-title {
+    font-size: 20pt;
+  }
+
+  .table-slips-page--3 .table-slip-sub {
+    font-size: 9pt;
+  }
+
+  .table-slips-page--3 .table-slip-list {
+    font-size: 8pt;
+  }
+
+  .table-slips-page--2 .table-slip-title {
+    font-size: 26pt;
+  }
+
+  .table-slips-page--2 .table-slip-sub {
+    font-size: 10pt;
+  }
+
+  .table-slips-page--2 .table-slip-list {
+    font-size: 10pt;
+  }
+
+  .table-slip {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 
