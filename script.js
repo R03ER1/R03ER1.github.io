@@ -162,6 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePeopleTableBtn = document.getElementById("toggle-people-table");
   const peopleTableContainer = document.getElementById("people-table-container");
   const peopleTableBody = document.getElementById("people-table-body");
+  const toggleDebtorsListBtn = document.getElementById("toggle-debtors-list");
+  const debtorsListContainer = document.getElementById("debtors-list-container");
   const priceRoom1Count = document.getElementById("price-room1-count");
   const priceRoom1Total = document.getElementById("price-room1-total");
   const priceRoom2Count = document.getElementById("price-room2-count");
@@ -184,6 +186,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTakenSeatsInfo();
     if (publicTableContainer && !publicTableContainer.classList.contains("hidden")) {
       renderPublicTable();
+    }
+    if (peopleTableContainer && !peopleTableContainer.classList.contains("hidden")) {
+      renderPeopleTable();
+    }
+    if (debtorsListContainer && !debtorsListContainer.classList.contains("hidden")) {
+      renderDebtorsList();
+    }
+  });
+
+  onSnapshot(paymentsCol, () => {
+    if (debtorsListContainer && !debtorsListContainer.classList.contains("hidden")) {
+      renderDebtorsList();
     }
     if (peopleTableContainer && !peopleTableContainer.classList.contains("hidden")) {
       renderPeopleTable();
@@ -594,6 +608,19 @@ document.addEventListener("DOMContentLoaded", () => {
         : "Zobrazit přehled podle lidí";
       if (isHidden) {
         renderPeopleTable();
+      }
+    });
+  }
+
+  if (toggleDebtorsListBtn && debtorsListContainer) {
+    toggleDebtorsListBtn.addEventListener("click", () => {
+      const isHidden = debtorsListContainer.classList.contains("hidden");
+      debtorsListContainer.classList.toggle("hidden", !isHidden);
+      toggleDebtorsListBtn.textContent = isHidden
+        ? "Skrýt seznam dlužníků"
+        : "Zobrazit seznam dlužníků";
+      if (isHidden) {
+        renderDebtorsList();
       }
     });
   }
@@ -1252,5 +1279,86 @@ async function renderPeopleTable() {
 
     body.appendChild(tr);
     body.appendChild(detailTr);
+  });
+}
+
+function debtorsCountPhrase(n) {
+  if (n === 0) return "Nikdo nedluží";
+  if (n === 1) return "1 osoba dluží";
+  if (n >= 2 && n <= 4) return `${n} osoby dluží`;
+  return `${n} osob dluží`;
+}
+
+/** Hosté se vstupným k zaplacení (jen hlavní/malý sál, stejně jako sloupec „Zbývá zaplatit“). */
+async function renderDebtorsList() {
+  const listBody = document.getElementById("debtors-list-body");
+  const summaryEl = document.getElementById("debtors-list-summary");
+  if (!listBody) return;
+  listBody.innerHTML = "";
+
+  const statsByName = new Map();
+  reservations.forEach((r) => {
+    const name = (r.name || "").trim();
+    if (!name) return;
+
+    if (!statsByName.has(name)) {
+      statsByName.set(name, { totalDue: 0 });
+    }
+    const stats = statsByName.get(name);
+    if (r.roomId === "room1") {
+      stats.totalDue += 450;
+    } else if (r.roomId === "room2") {
+      stats.totalDue += 420;
+    }
+  });
+
+  const paymentsSnapshot = await getDocs(paymentsCol);
+  const paymentsByName = new Map();
+  paymentsSnapshot.docs.forEach((d) => {
+    const data = d.data();
+    const name = (data.name || d.id || "").trim();
+    if (!name) return;
+    paymentsByName.set(name, Number(data.totalPaid) || 0);
+  });
+
+  const debtors = [];
+  statsByName.forEach((stats, name) => {
+    const paid = paymentsByName.get(name) || 0;
+    const remaining = stats.totalDue - paid;
+    if (remaining > 0) {
+      debtors.push({ name, remaining });
+    }
+  });
+
+  debtors.sort((a, b) => {
+    if (b.remaining !== a.remaining) return b.remaining - a.remaining;
+    return a.name.localeCompare(b.name, "cs", { sensitivity: "base" });
+  });
+
+  if (summaryEl) {
+    if (debtors.length === 0) {
+      summaryEl.textContent =
+        "Nikdo z hostů s místy v hlavním nebo malém sále momentálně nedluží na vstupném (nebo ještě nejsou rezervace).";
+    } else {
+      const totalDebt = debtors.reduce((sum, d) => sum + d.remaining, 0);
+      summaryEl.textContent = `${debtorsCountPhrase(debtors.length)} na vstupném celkem ${totalDebt} Kč (450 Kč / 420 Kč podle sálu; stání v částce není).`;
+    }
+  }
+
+  debtors.forEach(({ name, remaining }) => {
+    const li = document.createElement("li");
+    li.className = "debtors-list-item";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "debtors-list-name";
+    nameSpan.textContent = name;
+
+    const amtSpan = document.createElement("span");
+    amtSpan.className = "debtors-list-amount";
+    amtSpan.textContent = `${remaining} Kč`;
+
+    li.appendChild(nameSpan);
+    li.appendChild(amtSpan);
+    listBody.appendChild(li);
   });
 }

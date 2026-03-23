@@ -676,6 +676,43 @@ table tbody tr:hover {
   }
 }
 
+/* Seznam dlužníků (rozklik pod tabulkami) */
+.debtors-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 360px;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid #fecaca;
+  background: #fff;
+}
+
+.debtors-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #fee2e2;
+  font-size: 0.88rem;
+}
+
+.debtors-list-item:last-child {
+  border-bottom: none;
+}
+
+.debtors-list-name {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.debtors-list-amount {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
 .footer {
   max-width: 1200px;
   margin: 0 auto 24px;
