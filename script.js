@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearSelectionBtn = document.getElementById("clear-selection");
   const takenSeatsDiv = document.getElementById("taken-seats");
   const downloadCsvBtn = document.getElementById("download-csv");
+  const downloadGuestsPdfBtn = document.getElementById("download-guests-pdf");
   const togglePublicTableBtn = document.getElementById("toggle-public-table");
   const publicTableContainer = document.getElementById("public-table-container");
   const publicTableBody = document.getElementById("public-table-body");
@@ -606,6 +607,119 @@ document.addEventListener("DOMContentLoaded", () => {
     URL.revokeObjectURL(url);
   });
 
+  // Seznam hostů – A4 tisk / uložení jako PDF (data z Firestore, UTF-8)
+  if (downloadGuestsPdfBtn) {
+    downloadGuestsPdfBtn.addEventListener("click", async () => {
+      try {
+        const [resSnap, paySnap] = await Promise.all([
+          getDocs(reservationsCol),
+          getDocs(paymentsCol),
+        ]);
+        const allRes = resSnap.docs.map((d) => d.data());
+        if (allRes.length === 0) {
+          alert("Zatím nejsou žádné rezervace.");
+          return;
+        }
+
+        const statsByName = new Map();
+        allRes.forEach((r) => {
+          const name = (r.name || "").trim();
+          if (!name) return;
+
+          if (!statsByName.has(name)) {
+            statsByName.set(name, {
+              totalDue: 0,
+            });
+          }
+          const stats = statsByName.get(name);
+          if (r.roomId === "room1") {
+            stats.totalDue += 450;
+          } else if (r.roomId === "room2") {
+            stats.totalDue += 420;
+          }
+        });
+
+        const paymentsByName = new Map();
+        paySnap.docs.forEach((d) => {
+          const data = d.data();
+          const name = (data.name || d.id || "").trim();
+          if (!name) return;
+          paymentsByName.set(name, Number(data.totalPaid) || 0);
+        });
+
+        const sortedNames = Array.from(statsByName.keys()).sort((a, b) =>
+          a.localeCompare(b, "cs", { sensitivity: "base" })
+        );
+
+        const today = new Date().toLocaleDateString("cs-CZ");
+        const rowsHtml = sortedNames
+          .map((name) => {
+            const stats = statsByName.get(name);
+            const paid = paymentsByName.get(name) || 0;
+            const remaining = stats.totalDue - paid;
+            const lines = allRes
+              .filter((r) => (r.name || "").trim() === name)
+              .sort(sortReservationsForPerson)
+              .map(
+                (r) =>
+                  `<li>${escapeHtml(reservationLineText(r))}</li>`
+              )
+              .join("");
+            return (
+              "<tr>" +
+              `<td>${escapeHtml(name)}</td>` +
+              `<td class="num">${escapeHtml(`${remaining} Kč`)}</td>` +
+              `<td class="seats"><ul>${lines || "<li>—</li>"}</ul></td>` +
+              "</tr>"
+            );
+          })
+          .join("");
+
+        const html =
+          "<!DOCTYPE html><html lang=\"cs\"><head><meta charset=\"utf-8\">" +
+          "<title>Seznam hostů – maturák</title>" +
+          "<style>" +
+          "@page { size: A4; margin: 14mm; }" +
+          "body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 10pt; color: #111; }" +
+          "h1 { font-size: 14pt; margin: 0 0 4px; }" +
+          ".meta { font-size: 9pt; color: #444; margin-bottom: 12px; }" +
+          "table { width: 100%; border-collapse: collapse; table-layout: fixed; }" +
+          "th, td { border: 1px solid #333; padding: 5px 6px; vertical-align: top; word-wrap: break-word; }" +
+          "th { background: #f3f4f6; font-weight: 600; text-align: left; }" +
+          "td.num { text-align: right; white-space: nowrap; width: 22%; }" +
+          "td.seats ul { margin: 0; padding-left: 16px; }" +
+          "thead { display: table-header-group; }" +
+          "tr { page-break-inside: avoid; }" +
+          "</style></head><body>" +
+          "<h1>Seznam hostů</h1>" +
+          `<p class="meta">Maturitní ples – vygenerováno ${escapeHtml(today)}</p>` +
+          "<table><thead><tr>" +
+          "<th style=\"width:26%;\">Jméno</th>" +
+          "<th>Zbývá zaplatit</th>" +
+          "<th>Rezervovaná místa</th>" +
+          "</tr></thead><tbody>" +
+          rowsHtml +
+          "</tbody></table></body></html>";
+
+        const w = window.open("", "_blank");
+        if (!w) {
+          alert("Povolte v prohlížeči otevírání vyskakovacích oken pro tento web.");
+          return;
+        }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+        setTimeout(() => {
+          w.focus();
+          w.print();
+        }, 200);
+      } catch (e) {
+        console.error(e);
+        alert("Nepodařilo se načíst data nebo otevřít tisk.");
+      }
+    });
+  }
+
   // ----- Hlasování o zrušení maturáku -----
   onSnapshot(votesCol, (snapshot) => {
     const votes = snapshot.docs.map((doc) => doc.data());
@@ -792,6 +906,32 @@ function updatePriceSummary() {
   priceRoom2Count.textContent = countRoom2.toString();
   priceRoom2Total.textContent = `${totalRoom2} Kč`;
   priceTotal.textContent = `${total} Kč`;
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function reservationLineText(r) {
+  const roomName = ROOMS[r.roomId]?.name || r.roomId || "";
+  if (r.roomId === "Stání") {
+    return `${roomName} – místo ${r.seatNumber}`;
+  }
+  return `${roomName}, stůl ${r.tableNumber}, místo ${r.seatNumber}`;
+}
+
+function sortReservationsForPerson(a, b) {
+  if (a.roomId === b.roomId) {
+    if ((a.tableNumber || 0) === (b.tableNumber || 0)) {
+      return (a.seatNumber || 0) - (b.seatNumber || 0);
+    }
+    return (a.tableNumber || 0) - (b.tableNumber || 0);
+  }
+  return (a.roomId || "").localeCompare(b.roomId || "");
 }
 
 function renderPublicTable() {
