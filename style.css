@@ -605,7 +605,15 @@ body.guest-print-open {
   right: 0;
   top: 50%;
   bottom: 0;
-  background: #fff;
+  /* Nahoře uprostřed obrázku zcela průhledné, dolů postupně do plné bílé */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 22%,
+    rgba(255, 255, 255, 0.65) 55%,
+    rgba(255, 255, 255, 0.95) 85%,
+    #ffffff 100%
+  );
   z-index: 1;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
