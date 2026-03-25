@@ -603,14 +603,14 @@ body.guest-print-open {
   position: absolute;
   left: 0;
   right: 0;
-  top: 50%;
+  top: 40%;
   bottom: 0;
   /* Nahoře uprostřed obrázku zcela průhledné, dolů postupně do plné bílé */
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0.2) 22%,
-    rgba(255, 255, 255, 0.85) 55%,
+    rgba(255, 255, 255, 0.98) 45%,
     /*rgba(255, 255, 255, 0.95) 85%,*/
     #ffffff 100%
   );
