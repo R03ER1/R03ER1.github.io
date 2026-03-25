@@ -603,15 +603,16 @@ body.guest-print-open {
   position: absolute;
   left: 0;
   right: 0;
-  top: 30%;
+  top: 0;
   bottom: 0;
-  /* Nahoře uprostřed obrázku zcela průhledné, dolů postupně do plné bílé */
+  /* Celá výška obrázku: nahoře průhledné, v polovině výšky už plakát skoro nečitelný, ve 3/4 plná bílá */
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.2) 22%,
-    rgba(255, 255, 255, 0.65) 55%,
-    rgba(255, 255, 255, 0.95) 85%,
+    rgba(255, 255, 255, 0.14) 22%,
+    rgba(255, 255, 255, 0.52) 38%,
+    rgba(255, 255, 255, 0.93) 50%,
+    #ffffff 75%,
     #ffffff 100%
   );
   z-index: 1;
@@ -799,7 +800,7 @@ body.guest-print-open {
   }
 
   .table-slips-page--4-graphic .table-slip-graphic-table-num {
-    font-size: 144pt;
+    font-size: 120pt;
   }
 }
 
