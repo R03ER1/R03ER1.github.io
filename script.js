@@ -1062,9 +1062,17 @@ function roomShortSal(roomKey) {
   return roomKey === "room1" ? "Hlavní sál" : "Malý sál";
 }
 
-/** Lístečky ke stolům: HTML do #table-slips-sheet; perPage 2 | 3 | 4 */
+/**
+ * Lístečky ke stolům: HTML do #table-slips-sheet.
+ * perPage: 2 | 3 | 4 | "4-graphic" (čtvrtiny s img/graphics.jpg, seznam ve spodní polovině).
+ */
 function buildTableSlipsSheetHtml(allRes, perPage) {
-  const per = [2, 3, 4].includes(Number(perPage)) ? Number(perPage) : 4;
+  const graphicMode = perPage === "4-graphic";
+  const per = graphicMode
+    ? 4
+    : [2, 3, 4].includes(Number(perPage))
+      ? Number(perPage)
+      : 4;
   const slips = [];
 
   for (const roomKey of ["room1", "room2"]) {
@@ -1078,31 +1086,54 @@ function buildTableSlipsSheetHtml(allRes, perPage) {
       taken.forEach((r) => {
         bySeat.set(r.seatNumber, (r.name || "").trim() || "—");
       });
-      const items = [];
+      const itemLis = [];
       for (let s = 1; s <= table.seatCount; s++) {
         const name = bySeat.get(s);
-        items.push(
+        itemLis.push(
           `<li><span class="table-slip-seat">${s}.</span> ${escapeHtml(name ? name : "Volné")}</li>`
         );
       }
-      slips.push(
-        `<div class="table-slip">` +
-          `<div class="table-slip-head">` +
-          `<div class="table-slip-title">STŮL ${table.number}</div>` +
-          `<div class="table-slip-sub">${escapeHtml(shortSal)}</div>` +
-          `</div>` +
-          `<ul class="table-slip-list">${items.join("")}</ul>` +
-        `</div>`
-      );
+      const itemsJoined = itemLis.join("");
+
+      if (graphicMode) {
+        slips.push(
+          `<div class="table-slip table-slip--graphic">` +
+            `<div class="table-slip-graphic-inner">` +
+            `<div class="table-slip-graphic-lower">` +
+            `<div class="table-slip-graphic-meta">` +
+            `<div class="table-slip-graphic-table">Stůl ${table.number}</div>` +
+            `<div class="table-slip-graphic-sal">${escapeHtml(shortSal)}</div>` +
+            `</div>` +
+            `<ul class="table-slip-list table-slip-list--graphic">${itemsJoined}</ul>` +
+            `</div>` +
+            `</div>` +
+            `</div>`
+        );
+      } else {
+        slips.push(
+          `<div class="table-slip">` +
+            `<div class="table-slip-head">` +
+            `<div class="table-slip-title">STŮL ${table.number}</div>` +
+            `<div class="table-slip-sub">${escapeHtml(shortSal)}</div>` +
+            `</div>` +
+            `<ul class="table-slip-list">${itemsJoined}</ul>` +
+            `</div>`
+        );
+      }
     }
   }
 
-  const gridClass =
-    per === 4
-      ? "table-slips-page--4"
-      : per === 3
-        ? "table-slips-page--3"
-        : "table-slips-page--2";
+  let gridClass;
+  if (graphicMode) {
+    gridClass = "table-slips-page--4 table-slips-page--4-graphic";
+  } else if (per === 4) {
+    gridClass = "table-slips-page--4";
+  } else if (per === 3) {
+    gridClass = "table-slips-page--3";
+  } else {
+    gridClass = "table-slips-page--2";
+  }
+
   const pagesHtml = [];
   for (let i = 0; i < slips.length; i += per) {
     const slice = slips.slice(i, i + per);
@@ -1117,7 +1148,10 @@ function buildTableSlipsSheetHtml(allRes, perPage) {
     );
   }
 
-  const hint = `<p class="table-slips-screen-hint">Náhled: ${slips.length} stolů, na stránku ${per} lístečků. Po tisku stříhejte podle čar.</p>`;
+  const hintGraphic = graphicMode
+    ? " Režim s plakátem – v tisku zapněte grafiku na pozadí."
+    : "";
+  const hint = `<p class="table-slips-screen-hint">Náhled: ${slips.length} stolů, na stránku ${per} lístečků (${graphicMode ? "grafická šablona" : "text"}). Po tisku stříhejte podle čar.${hintGraphic}</p>`;
 
   return hint + pagesHtml.join("");
 }

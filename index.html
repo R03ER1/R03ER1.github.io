@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rezervace míst na maturitní ples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -160,14 +163,15 @@
     <div style="margin-top:12px;">
       <label for="table-slips-per-page" class="hint" style="display:block; margin-bottom:6px;">Lístečky ke stolům – kolik na jednu stránku A4:</label>
       <select id="table-slips-per-page" style="margin-bottom:8px; padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem;">
-        <option value="4" selected>4 (čtvrtiny – 2×2)</option>
+        <option value="4" selected>4 (čtvrtiny – 2×2, jen text)</option>
+        <option value="4-graphic">4 (čtvrtiny – grafika Maturák)</option>
         <option value="3">3 (třetiny pod sebou)</option>
         <option value="2">2 (poloviny pod sebou)</option>
       </select>
       <div>
         <button type="button" id="download-table-slips-print" class="btn secondary">Lístečky ke stolům (tisk A4)</button>
       </div>
-      <p class="hint" style="margin-top:6px;">Každý lísteček: <strong>STŮL číslo</strong>, sál a seznam míst s objednateli. Tečkované okraje slouží ke střihu. Tisk jako u seznamu hostů.</p>
+      <p class="hint" style="margin-top:6px;">Každý lísteček: <strong>STŮL číslo</strong>, sál a seznam míst s objednateli. Tečkované okraje slouží ke střihu. Režim <strong>grafika Maturák</strong> použije <code>img/graphics.jpg</code> a seznam vespod ozdobným písmem – v dialogu tisku často zapněte <strong>„Grafika na pozadí“</strong>, jinak se plakát netiskne.</p>
     </div>
     <div style="margin-top:16px;">
       <button id="toggle-public-table" class="btn secondary">Zobrazit přehled všech míst</button>
