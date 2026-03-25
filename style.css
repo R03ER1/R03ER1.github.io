@@ -566,70 +566,85 @@ body.guest-print-open {
   color: #334155;
 }
 
-/* Čtvrtiny s grafickou šablonou (img/graphics.jpg) */
+/* Čtvrtiny s grafickou šablonou (img/graphics.jpg) – obrázek nahoře, od poloviny výšky obrázku bílá + číslo */
 .table-slip.table-slip--graphic {
   padding: 0;
-  background-color: #c7d2fe;
-  background-image: url("img/graphics.jpg");
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  background: #fff;
+  overflow: hidden;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
   color-adjust: exact;
 }
 
-.table-slip-graphic-inner {
+.table-slip-graphic-wrap {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  min-height: 100%;
   height: 100%;
+  min-height: 0;
   box-sizing: border-box;
 }
 
-.table-slip-graphic-lower {
-  flex: 0 0 50%;
-  min-height: 50%;
-  max-height: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 4px 6px 6px;
-  box-sizing: border-box;
-  overflow: hidden;
-  background: linear-gradient(
-    to bottom,
-    rgba(230, 236, 252, 0) 0%,
-    rgba(230, 236, 252, 0.55) 8%,
-    rgba(248, 250, 252, 0.94) 28%,
-    rgba(248, 250, 252, 0.97) 100%
-  );
+.table-slip-graphic-photo {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.table-slip-graphic-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: top;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-.table-slip-graphic-meta {
-  text-align: center;
-  flex-shrink: 0;
-  margin-bottom: 2px;
+.table-slip-graphic-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  bottom: 0;
+  background: #fff;
+  z-index: 1;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
-.table-slip-graphic-table {
-  font-family: "Great Vibes", cursive;
-  font-size: clamp(1.25rem, 4vw, 1.75rem);
-  color: #1e3a5f;
-  line-height: 1.15;
+.table-slip-graphic-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  bottom: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 2px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.table-slip-graphic-table-num {
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 11vw, 3.5rem);
+  line-height: 0.9;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
 .table-slip-graphic-sal {
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  color: #334155;
-  letter-spacing: 0.12em;
+  color: #475569;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .table-slip-list.table-slip-list--graphic {
@@ -642,7 +657,9 @@ body.guest-print-open {
   min-height: 0;
   overflow-y: auto;
   margin: 0;
-  padding: 0 2px;
+  padding: 4px 6px 6px;
+  background: #fff;
+  list-style: none;
 }
 
 .table-slip-list--graphic li {
@@ -749,25 +766,32 @@ body.guest-print-open {
     padding: 0;
   }
 
-  .table-slip-graphic-lower {
-    padding: 2mm 2.5mm 2.5mm;
+  .table-slip-graphic-head {
+    padding: 1mm 2mm 2mm;
   }
 
-  .table-slip-graphic-table {
-    font-size: 22pt;
+  .table-slip-graphic-table-num {
+    font-size: 42pt;
+    line-height: 0.88;
   }
 
   .table-slip-graphic-sal {
-    font-size: 7pt;
+    font-size: 6.5pt;
+    margin-top: 1mm;
   }
 
   .table-slip-list--graphic {
     font-size: 6.5pt;
     line-height: 1.2;
+    padding: 2mm 2.5mm 2.5mm;
   }
 
   .table-slips-page--4-graphic .table-slip-list--graphic {
     font-size: 6pt;
+  }
+
+  .table-slips-page--4-graphic .table-slip-graphic-table-num {
+    font-size: 48pt;
   }
 }
 

@@ -1098,14 +1098,16 @@ function buildTableSlipsSheetHtml(allRes, perPage) {
       if (graphicMode) {
         slips.push(
           `<div class="table-slip table-slip--graphic">` +
-            `<div class="table-slip-graphic-inner">` +
-            `<div class="table-slip-graphic-lower">` +
-            `<div class="table-slip-graphic-meta">` +
-            `<div class="table-slip-graphic-table">Stůl ${table.number}</div>` +
+            `<div class="table-slip-graphic-wrap">` +
+            `<div class="table-slip-graphic-photo">` +
+            `<img class="table-slip-graphic-img" src="img/graphics.jpg" alt="">` +
+            `<div class="table-slip-graphic-mask" aria-hidden="true"></div>` +
+            `<div class="table-slip-graphic-head">` +
+            `<div class="table-slip-graphic-table-num">${table.number}</div>` +
             `<div class="table-slip-graphic-sal">${escapeHtml(shortSal)}</div>` +
             `</div>` +
-            `<ul class="table-slip-list table-slip-list--graphic">${itemsJoined}</ul>` +
             `</div>` +
+            `<ul class="table-slip-list table-slip-list--graphic">${itemsJoined}</ul>` +
             `</div>` +
             `</div>`
         );
