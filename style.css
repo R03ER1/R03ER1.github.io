@@ -184,6 +184,29 @@ select:focus {
   color: var(--accent-green);
 }
 
+.deadline-notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #7c2d12;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: var(--radius-md);
+}
+
+.seat.deadline-locked {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.seat.deadline-locked:hover {
+  transform: none;
+}
+
 .seats-container {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

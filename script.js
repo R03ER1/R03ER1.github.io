@@ -98,6 +98,11 @@ function getFreeSeatCount(roomId, table) {
 
 // ---------- Aplikace ----------
 document.addEventListener("DOMContentLoaded", () => {
+  // Časy v UTC: CET = UTC+1 (platí do začátku letního času koncem března)
+  const orgAccessUntilUtc = Date.UTC(2026, 2, 16, 21, 0); // 16. 3. 2026 22:00 CET
+  const publicAccessFromUtc = Date.UTC(2026, 2, 18, 16, 0); // 18. 3. 2026 17:00 CET
+  const reservationsEndUtc = Date.UTC(2026, 2, 26, 11, 0, 0); // 26. 3. 2026 12:00 středoevropský čas (CET)
+
   const form = document.getElementById("reservation-form");
   const nameInput = document.getElementById("name");
   const standingCountInput = document.getElementById("standing-count");
@@ -280,6 +285,8 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedSeatNumbers = new Set();
     seatsContainer.innerHTML = "";
 
+    const reservationsEnded = Date.now() >= reservationsEndUtc;
+
     for (let i = 1; i <= table.seatCount; i++) {
       const btn = document.createElement("button");
       btn.type = "button";
@@ -289,6 +296,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (takenSeatNumbers.has(i)) {
         btn.classList.add("taken");
         btn.title = "Místo je již obsazené";
+      } else if (reservationsEnded) {
+        btn.classList.add("deadline-locked");
+        btn.disabled = true;
+        btn.title = "Lhůta pro nové rezervace skončila";
       } else {
         btn.classList.add("free");
         btn.addEventListener("click", () => toggleSeatSelection(i, btn));
@@ -301,6 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function toggleSeatSelection(seatNumber, element) {
+    if (Date.now() >= reservationsEndUtc) return;
+
     if (selectedSeatNumbers.has(seatNumber)) {
       selectedSeatNumbers.delete(seatNumber);
       element.classList.remove("selected");
@@ -378,6 +391,13 @@ document.addEventListener("DOMContentLoaded", () => {
     formMessage.className = "form-message";
     if (paymentInfo) {
       paymentInfo.innerHTML = "";
+    }
+
+    if (Date.now() >= reservationsEndUtc) {
+      formMessage.textContent =
+        "Rezervace nových míst už nejsou možné. Lhůta skončila 26. března 2026 v poledne (středoevropský čas).";
+      formMessage.classList.add("error");
+      return;
     }
 
     const name = nameInput.value.trim();
@@ -883,13 +903,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----- Odemčení rezervací dle času -----
-  // - do 16. 3. 2026 22:00 CET (21:00 UTC) povoleno pro organizátory
-  // - od 16. 3. 2026 22:00 CET do 18. 3. 2026 17:00 CET zamknuto s odpočtem
-  // - po 18. 3. 2026 17:00 CET trvale odemčeno
-  const orgAccessUntilUtc = Date.UTC(2026, 2, 16, 21, 0); // 16. 3. 2026 22:00 CET
-  const publicAccessFromUtc = Date.UTC(2026, 2, 18, 16, 0); // 18. 3. 2026 17:00 CET
+  // Konstanty orgAccessUntilUtc, publicAccessFromUtc, reservationsEndUtc jsou nahoře v callbacku.
+  // - do 16. 3. 2026 22:00 CET povoleno pro organizátory
+  // - poté krátké zamčení s odpočtem do 18. 3. 2026 17:00 CET
+  // - po 18. 3. 2026 17:00 CET veřejné rezervace až do 26. 3. 2026 12:00 CET, pak konec
   const reserveButton = document.getElementById("reserve-submit");
   const reservationCountdown = document.getElementById("reservation-countdown");
+  let prevReservationsEnded = null;
 
   function formatDuration(ms) {
     if (ms <= 0) return null;
@@ -911,14 +931,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!reserveButton || !reservationCountdown) return;
 
     const now = Date.now();
+    const reservationsEnded = now >= reservationsEndUtc;
+    if (prevReservationsEnded !== reservationsEnded) {
+      prevReservationsEnded = reservationsEnded;
+      renderSeats();
+    }
+
+    if (reservationsEnded) {
+      reserveButton.disabled = true;
+      reservationCountdown.innerHTML =
+        "<strong>Rezervace jsou ukončeny.</strong> Nové místo už nelze přidat od 26. března 2026 v poledne (středoevropský čas).";
+      return;
+    }
+
     const diffToOrgEnd = orgAccessUntilUtc - now;
     const diffToPublicStart = publicAccessFromUtc - now;
+    const diffToResEnd = reservationsEndUtc - now;
 
     // 1) Do 16. 3. 2026 22:00 CET – povoleno, info pro organizátory
     if (now < orgAccessUntilUtc) {
       reserveButton.disabled = false;
       reservationCountdown.textContent =
-        "Rezervace jsou aktuálně otevřené (režim pro organizátory). Od 16. března 2026 ve 22:00 budou dočasně uzavřeny a znovu spuštěny pro veřejnost.";
+        "Rezervace jsou aktuálně otevřené (režim pro organizátory). Od 16. března 2026 ve 22:00 budou dočasně uzavřeny a znovu spuštěny pro veřejnost. " +
+        "Nové rezervace u stolů budou možné nejpozději do 26. března 2026 v poledne (středoevropský čas), poté systém nové rezervace nepřijme.";
       return;
     }
 
@@ -927,14 +962,19 @@ document.addEventListener("DOMContentLoaded", () => {
       reserveButton.disabled = true;
       const durationText = formatDuration(diffToPublicStart);
       reservationCountdown.innerHTML =
-        `Rezervace pro veřejnost se spustí <strong>18. března 2026 v 17:00</strong>. Zbývá <strong>${durationText}</strong>.`;
+        `Rezervace pro veřejnost se spustí <strong>18. března 2026 v 17:00</strong>. Zbývá <strong>${durationText}</strong>. ` +
+        `Poté budou rezervace možné až do <strong>26. března 2026 v poledne (středoevropský čas)</strong>.`;
       return;
     }
 
-    // 3) Po 18. 3. 2026 17:00 CET – trvale odemčeno
+    // 3) Po 18. 3. 2026 17:00 CET až do 26. 3. 2026 12:00 CET
     reserveButton.disabled = false;
-    reservationCountdown.textContent =
-      "Rezervace jsou spuštěné. Můžete si vybrat místa a pokračovat v rezervaci.";
+    const untilEndText = formatDuration(diffToResEnd);
+    reservationCountdown.innerHTML =
+      "Rezervace jsou spuštěné. Nové místo u stolu lze přidat do <strong>26. března 2026 v poledne (středoevropský čas)</strong>. " +
+      (untilEndText
+        ? `Do konce lhůty zbývá <strong>${untilEndText}</strong>.`
+        : "");
   }
 
   updateReservationAvailability();
