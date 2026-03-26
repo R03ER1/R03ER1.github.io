@@ -628,11 +628,11 @@ body.guest-print-open {
   bottom: 0;
   z-index: 2;
   box-sizing: border-box;
-  padding: 2px 4px 4px;
+  padding: 6px 4px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   pointer-events: none;
 }
@@ -644,6 +644,8 @@ body.guest-print-open {
   line-height: 0.9;
   color: #0f172a;
   letter-spacing: -0.02em;
+  margin-bottom: 0.04em;
+  transform: translateY(-6%);
 }
 
 .table-slip-graphic-sal {
@@ -653,7 +655,8 @@ body.guest-print-open {
   color: #475569;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 10px;
+  flex-shrink: 0;
 }
 
 .table-slip-list.table-slip-list--graphic {
@@ -780,17 +783,20 @@ body.guest-print-open {
   }
 
   .table-slip-graphic-head {
-    padding: 1mm 2mm 2mm;
+    padding: 2mm 2mm 2.5mm;
+    justify-content: flex-start;
   }
 
   .table-slip-graphic-table-num {
     font-size: 126pt;
     line-height: 0.88;
+    margin-bottom: 0.03em;
+    transform: translateY(-5%);
   }
 
   .table-slip-graphic-sal {
     font-size: 6.5pt;
-    margin-top: 1mm;
+    margin-top: 2.5mm;
   }
 
   .table-slip-list--graphic {
