@@ -726,6 +726,10 @@ body.guest-print-open {
     break-after: auto;
   }
 
+  .table-slips-page--4-graphic {
+    overflow: visible;
+  }
+
   .table-slip {
     padding: 3mm 4mm;
   }
@@ -801,6 +805,37 @@ body.guest-print-open {
 
   .table-slips-page--4-graphic .table-slip-graphic-table-num {
     font-size: 120pt;
+  }
+
+  /*
+   * Grafické čtvrtiny: při tisku/PDF se jinak ořeže obsah v scroll oblasti (typicky jen ~10 řádků).
+   * Viditelný celý seznam + mírně menší řádky, aby se vešlo i 12+ míst do buňky.
+   */
+  .table-slips-page--4-graphic .table-slip.table-slip--graphic {
+    overflow: visible !important;
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  .table-slips-page--4-graphic .table-slip-graphic-wrap {
+    overflow: visible !important;
+    min-height: auto;
+    height: auto;
+    max-height: none !important;
+  }
+
+  .table-slips-page--4-graphic .table-slip-list.table-slip-list--graphic {
+    overflow: visible !important;
+    max-height: none !important;
+    flex: none !important;
+    min-height: auto !important;
+    font-size: 5.5pt;
+    line-height: 1.14;
+    padding: 1.5mm 2mm 2mm;
+  }
+
+  .table-slips-page--4-graphic .table-slip-list--graphic li {
+    padding: 0;
   }
 }
 
