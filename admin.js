@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("admin-password");
   const passwordMessage = document.getElementById("password-message");
   const loginBtn = document.getElementById("admin-login");
+  const logoutBtn = document.getElementById("admin-logout");
   const clearAllBtn = document.getElementById("clear-all");
   const tableBody = document.getElementById("admin-table-body");
   const adminMessage = document.getElementById("admin-message");
@@ -110,6 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
     adminSection.classList.remove("hidden");
     await loadData();
     initializeAdminForm();
+  });
+
+  logoutBtn?.addEventListener("click", () => {
+    adminSection.classList.add("hidden");
+    passwordSection.classList.remove("hidden");
+    passwordInput.value = "";
+    passwordMessage.textContent = "";
+    passwordMessage.className = "form-message";
   });
 
   async function loadData() {

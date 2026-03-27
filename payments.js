@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("payments-password");
   const passwordMessage = document.getElementById("password-message");
   const loginBtn = document.getElementById("payments-login");
+  const logoutBtn = document.getElementById("payments-logout");
   const tableBody = document.getElementById("payments-table-body");
   const paymentsMessage = document.getElementById("payments-message");
 
@@ -54,6 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordSection.classList.add("hidden");
     paymentsSection.classList.remove("hidden");
     await loadData();
+  });
+
+  logoutBtn?.addEventListener("click", () => {
+    paymentsSection.classList.add("hidden");
+    passwordSection.classList.remove("hidden");
+    passwordInput.value = "";
+    passwordMessage.textContent = "";
+    passwordMessage.className = "form-message";
   });
 
   async function loadData() {
