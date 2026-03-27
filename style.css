@@ -925,19 +925,6 @@ table tbody tr:hover {
   color: #b91c1c;
 }
 
-.admin-section-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.admin-section-head h2 {
-  margin: 0;
-}
-
 .footer {
   max-width: 1200px;
   margin: 0 auto 24px;
